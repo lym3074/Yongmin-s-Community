@@ -80,7 +80,7 @@ public class BoardController {
 		return "redirect:/board/list";
 	}
 	
-	// git test 한번 해보자
+
 	 @RequestMapping(value="/delete", method=RequestMethod.POST)
 	 public String delete(BoardVO boardVO) throws Exception { 
 		 logger.info("delete");

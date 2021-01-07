@@ -13039,3 +13039,51 @@ java.lang.NullPointerException: Cannot invoke "java.net.URI.toString()" because 
 
 !ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:02:41.864
 !MESSAGE ClasspathListenerHandler removeClasspathListener sts4.classpath.aCDRCpgD => OK
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:24.291
+!MESSAGE Entering DelegatingStreamConnectionProvider()
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:24.308
+!MESSAGE DelegatingStreamConnectionProvider classloader = org.eclipse.osgi.internal.loader.EquinoxClassLoader@70420c70[org.springframework.tooling.boot.ls:1.23.0.202010230633(id=673)]
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:24.310
+!MESSAGE SpringBootLanguageServer exists!
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:31.900
+!MESSAGE Boot LS startup time from start to initialized: 7566ms
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:32.074
+!MESSAGE ClasspathListenerHandler addClasspathListener sts4.classpath.oMYGcrZUisBatched = true
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:32.078
+!MESSAGE Setting up ClasspathListenerManager
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:32.081
+!MESSAGE Scheduling initial event for all projects ...
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:32.084
+!MESSAGE Scheduling initial event for all projects DONE
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:32.089
+!MESSAGE exists = true open = true => deleted = false
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:32.098
+!MESSAGE ClasspathListenerHandler addClasspathListener sts4.classpath.oMYGcrZU => OK
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:32.131
+!MESSAGE classpath=36 entries
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:32.147
+!MESSAGE buffering callback sts4.classpath.oMYGcrZU YM_Community false 34
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:32.149
+!MESSAGE executing callback sts4.classpath.oMYGcrZU 1 batched events
+
+!ENTRY org.springframework.tooling.ls.eclipse.commons 1 0 2021-01-07 16:33:32.182
+!MESSAGE executing callback sts4.classpath.oMYGcrZU SUCCESS [done]
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-07 16:33:43.388
+!MESSAGE Using platform encoding (MS949 actually) to copy filtered resources, i.e. build is platform dependent!
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-07 16:33:43.398
+!MESSAGE Using platform encoding (MS949 actually) to copy filtered resources, i.e. build is platform dependent!
