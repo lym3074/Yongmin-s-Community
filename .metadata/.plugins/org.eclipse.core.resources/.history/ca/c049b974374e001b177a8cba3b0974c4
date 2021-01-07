@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="boardMapper">
+	<!-- 게시판 글 작성 -->
+	<insert id="insert">
+		INSERT INTO MP_BOARD( BNO, TITLE, CONTENT, WRITER ) 
+		VALUES( MP_BOARD_SEQ.NEXTVAL, #{title},#{content},#{writer})
+	</insert>
+	
+	<!-- 게시판 list 조회 -->
+	<select id="listPage" resultType="kr.co.vo.BoardVO" parameterType="kr.co.vo.SearchCriteria">
+		SELECT * FROM (
+						SELECT MP_BOARD.*,
+							   ROW_NUMBER() OVER(ORDER BY BNO DESC) AS RNUM 
+						FROM MP_BOARD
+						WHERE 1=1
+						<include refid="search"></include>
+						)
+			WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
+	</select>
+	
+	<select id="getPrev" resultType="kr.co.vo.BoardVO">
+	SELECT BNO FROM (SELECT BNO FROM MP_BOARD ORDER BY BNO DESC)
+	WHERE BNO &lt; #{bno}
+	AND ROWNUM =1
+	</select>
+	
+	<!-- 총 게시물 -->
+	<select id="listCount" parameterType="kr.co.vo.SearchCriteria" resultType="int">
+		SELECT COUNT(BNO)
+		FROM MP_BOARD
+		WHERE 1=1
+		<include refid="search"></include>
+		AND BNO > 0
+	</select>
+	
+	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 't'.toString()">AND TITLE LIKE '%' || #{keyword} || '%'</if>
+			<if test="searchType == 'w'.toString()">AND WRITER LIKE '%' || #{keyword} || '%'</if>
+		</if> 
+	</sql>
+	
+	<!-- 반복되는 쿼리 문장을 따로 정의하여 끼워넣을 수 있게 만든다. -->
+	
+	<!-- 게시판 detail page 조회 -->
+	<select id="read" parameterType="int" resultType="kr.co.vo.BoardVO">
+		SELECT BNO
+			, TITLE
+			, CONTENT
+			, WRITER
+			, REGDATE 
+			FROM MP_BOARD WHERE BNO = #{bno}
+	</select>
+	
+	<!-- 게시글 수정 -->
+	<update id="update" parameterType="kr.co.vo.BoardVO">
+		UPDATE MP_BOARD
+		SET TITLE = #{title},
+			CONTENT = #{content}
+		WHERE BNO = #{bno}
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		DELETE FROM MP_BOARD
+		WHERE BNO = #{bno}
+	</delete>
+	
+</mapper>

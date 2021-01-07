@@ -1,0 +1,132 @@
+@charset "UTF-8";
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap');
+@import url('/resources/css/header.css');
+
+body {
+    background-color: antiquewhite;
+}
+
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding-top: 100px;
+}
+
+/*--------------- 게시글 정보 테이블 ----------------*/
+main .table {
+    display: table;
+    table-layout: auto;
+    width: 600px;
+    text-align: center;
+    border-top: 3px solid #493D26;
+    font-size: 12px;
+    border-collapse: collapse;
+}
+
+main .list-title {
+    width: 600px;
+    display: flex;
+    padding-bottom: 5px;
+}
+main .list-title h1 {
+    color: #827B60;
+    margin-top: 20px;
+    margin-bottom: 30px;
+    cursor: default;
+ }
+
+main .list-title img {
+    height: 70px;
+    width: 60px;
+    padding-top: 10px;
+    margin-right: 2px;
+ }
+
+ 
+ main .detail-table {
+    width: 600px;
+    background-color: rgb(250, 241, 231);
+    border-collapse: collapse;
+}
+
+
+
+.detail-table th {
+    background-color: #493D26;
+    color: white;
+    border-right: none;
+    height: 30px;
+    width: 150px;
+}
+
+.detail-table tr {
+    border-bottom: 1px solid   #827B60;
+}
+
+.detail-table .align-center {
+    text-align: center;
+    width: 150px;
+}
+
+.detail-table td {
+    text-align: left;
+    padding-left: 10px;
+}
+
+.detail-table .content td {
+    padding-left: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.list-bottom-side {
+	margin-left: 300px;
+    margin-top: 5px;
+}
+
+.list-bottom-side button {
+	
+    width: 50px;
+    height: 20px;
+    background: black;
+    color: #fff;
+    font-size: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+
+.pn-table {
+    margin-top: 10px;
+    width: 600px;
+    border-top: 1px solid #827B60;
+    border-bottom: 3px solid #493D26;
+    background-color: rgb(250, 241, 231);
+    font-size: 12px;
+    border-collapse: collapse;
+}
+
+.pn-table th {
+    background-color: #493D26;
+    color: white;
+    border-right: none;
+    height: 30px;
+    width: 150px;
+}
+
+.pn-table tr {
+    border-bottom: 1px solid #827B60;
+}
+
+.pn-table td {
+    padding-left: 10px;
+}
+
+.align-center {
+    text-align: center;
+}

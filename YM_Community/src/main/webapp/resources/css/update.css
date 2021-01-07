@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap');
+@import url('/resources/css/header.css');
+@import url('/resources/css/detail.css');
+
+main .detail-table input {
+border: 1px solid gray;
+padding-top: 2px;
+padding-bottom: 2px;
+width: 350px;
+background-color: rgb(250, 241, 231);
+}
+
+main .detail-table textarea {
+    border: 1px solid gray;
+    width: 570px;
+    height: 250px;
+    background-color: rgb(250, 241, 231);
+}
+
+.update-bottom-side {
+    margin-left:250px;
+    margin-top: 5px;
+}
+
+.update-bottom-side button {
+    width: 50px;
+    height: 20px;
+    background: black;
+    color: #fff;
+    font-size: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.update-bottom-side a {
+    padding:3.5px 15px 3.5px 15px;
+    width: 50px;
+    height: 20px;
+    text-decoration: none;
+    color:white;
+    font-size: 10px;
+    border-radius: 5px;
+    background: black;
+}

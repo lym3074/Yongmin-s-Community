@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
+		<item key="wrap" value="true"/>
+		<item key="casesensitive" value="false"/>
+		<item key="wholeword" value="false"/>
+		<item key="incremental" value="false"/>
+		<item key="isRegEx" value="false"/>
+		<item key="selection" value="hidden"/>
+		<list key="findhistory">
+			<item value="hidden"/>
+			<item value="write"/>
+			<item value="auto"/>
+			<item value="enco"/>
+			<item value="list-title"/>
+			<item value="prev"/>
+			<item value="pagestart"/>
+			<item value="btn"/>
+			<item value="pageMaker"/>
+			<item value="makeQuery"/>
+			<item value="&#x09;&#x09;return sqlSession.selectList(&quot;boardMapper.listPage&quot;, Scriteria);"/>
+			<item value="makeSearch"/>
+			<item value="makeSerach"/>
+			<item value="form"/>
+			<item value="&lt;select id=&quot;read&quot; parameterType=&quot;int&quot; resultType=&quot;kr.co.vo.BoardVO&quot;&gt;"/>
+		</list>
+		<list key="replacehistory">
+		</list>
+	</section>
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
+		<item key="DIALOG_X_ORIGIN" value="1247"/>
+		<item key="DIALOG_Y_ORIGIN" value="235"/>
+		<item key="DIALOG_WIDTH" value="340"/>
+		<item key="DIALOG_HEIGHT" value="454"/>
+		<item key="DIALOG_FONT_NAME" value="1|맑은 고딕|9.0|0|WINDOWS|1|-15|0|0|0|400|0|0|0|1|0|0|0|0|맑은 고딕"/>
+	</section>
+</section>

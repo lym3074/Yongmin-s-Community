@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap');
+@import url('/root/css/header.css');
+@import url('/root/css/detail.css');
+
+::selection {
+    background-color: #827B60;
+    color: white;
+}
+main .detail-table input {
+border: 1px solid gray;
+padding-top: 2px;
+padding-bottom: 2px;
+width: 350px;
+background-color: rgb(250, 241, 231);
+}
+
+main .detail-table textarea {
+    border: 1px solid gray;
+    width: 570px;
+    height: 250px;
+    background-color: rgb(250, 241, 231);
+}

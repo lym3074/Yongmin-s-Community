@@ -1,0 +1,9 @@
+
+12월 16, 2020 16:30:23.592 NEW SESSION
+12월 16, 2020 16:30:23.600 [215092:249560:1216/163023.375:ERROR:device_event_log_impl.cc(211)] [16:30:23.374] USB: usb_device_handle_win.cc:1020 Failed to read descriptor from node connection: 시스템에 부착된 장치가 작동하지 않습니다. (0x1F)
+12월 16, 2020 16:30:23.605 [215092:249560:1216/163023.502:ERROR:device_event_log_impl.cc(211)] [16:30:23.503] Bluetooth: bluetooth_adapter_winrt.cc:1073 Getting Default Adapter failed.
+12월 16, 2020 16:40:06.361 [1216/164006.348:ERROR:directory_reader_win.cc(43)] FindFirstFile: 지정된 경로를 찾을 수 없습니다. (0x3)
+
+12월 30, 2020 14:09:39.614 NEW SESSION
+12월 30, 2020 14:09:39.614 [2300:2440:1230/140939.611:ERROR:device_event_log_impl.cc(211)] [14:09:39.611] USB: usb_device_handle_win.cc:1020 Failed to read descriptor from node connection: 시스템에 부착된 장치가 작동하지 않습니다. (0x1F)
+12월 30, 2020 14:19:25.911 [1230/141925.909:ERROR:directory_reader_win.cc(43)] FindFirstFile: 지정된 경로를 찾을 수 없습니다. (0x3)

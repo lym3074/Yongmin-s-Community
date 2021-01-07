@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="memberMapper">
+	<!-- 가입 -->
+	<insert id="join">
+		INSERT INTO MP_MEMBER( USERID, USERPWD, USERNAME, USEREMAIL )
+		VALUES(#{userId},#{userPwd},#{userName},#{userEmail})
+	</insert>
+	
+	<!-- 로그인 -->
+	<select id="login" resultType="kr.co.vo.MemberVO">
+		SELECT * FROM MP_MEMBER
+		WHERE USERID = #{userId}
+		AND USERPWD = #{userPwd}
+	</select>
+	
+	<select id="listCount" parameterType="kr.co.vo.MemberVO" resultType="int">
+		SELECT COUNT(BNO)
+		FROM MP_BOARD
+		WHERE BNO > 0 AND WRITER = #{userId}
+	</select>
+	
+	<select id="memberPosting" resultType="kr.co.vo.BoardVO" parameterType="HashMap">
+		SELECT * FROM (
+						SELECT MP_BOARD.*,
+							   ROW_NUMBER() OVER(ORDER BY BNO DESC) AS RNUM 
+						FROM MP_BOARD WHERE WRITER = #{userId}
+						)
+			WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
+	</select>
+	
+	<delete id="deleteAll">
+		DELETE MP_BOARD WHERE BNO IN 
+			<foreach collection="delNos" item="item" index="index" separator="," open="(" close=")">
+			#{item.value}
+			</foreach>
+	</delete>
+	
+	
+	
+	<!-- 게시글 수정 
+	<update id="update" parameterType="kr.co.vo.boardVO">
+		UPDATE MP_BOARD 
+		SET TITLE = #{title},
+			CONTENT = #{content} 
+		WHERE BNO = #{bno}
+	</update> -->
+	
+	<!-- 게시글 삭제 
+	<delete id="delete" parameterType="int">
+		DELETE FROM MP_BOARD 
+		WHERE BNO = #{bno}
+	</delete> -->
+	
+</mapper>
