@@ -74,6 +74,7 @@ public class BoardController {
 		return "board/update";
 	}
 	
+	// 게시판 수정 git
 	@RequestMapping(value="/update", method=RequestMethod.POST)
 	public String update(BoardVO boardVO) throws Exception {
 		service.update(boardVO);
