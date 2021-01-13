@@ -16,6 +16,7 @@
 	<context:component-scan base-package="kr.co.service"></context:component-scan>
     <context:component-scan base-package="kr.co.dao"></context:component-scan>
     <context:component-scan base-package="kr.co.vo"></context:component-scan>
+    <!-- service와 dao vo를 사용하기 위해  -->
 	
 	<!-- 오라클 접속 -->
     <bean class="org.springframework.jdbc.datasource.DriverManagerDataSource" id="dataSource">

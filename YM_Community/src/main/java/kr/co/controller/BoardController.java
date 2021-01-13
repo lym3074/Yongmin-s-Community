@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import kr.co.service.BoardService;
 import kr.co.vo.BoardVO;
@@ -66,7 +67,7 @@ public class BoardController {
 		return "board/detail";
 	}
 	
-	// getUpdatePage
+	// get updatePage
 	@RequestMapping(value="/update", method=RequestMethod.GET)
 	public String updateView(BoardVO boardVO, Model model) throws Exception {
 		logger.info("updateView");
@@ -74,13 +75,14 @@ public class BoardController {
 		return "board/update";
 	}
 	
+	// update action
 	@RequestMapping(value="/update", method=RequestMethod.POST)
 	public String update(BoardVO boardVO) throws Exception {
 		service.update(boardVO);
 		return "redirect:/board/list";
 	}
 	
-	// git test 한번 해보자
+	// delete action
 	 @RequestMapping(value="/delete", method=RequestMethod.POST)
 	 public String delete(BoardVO boardVO) throws Exception { 
 		 logger.info("delete");

@@ -74,11 +74,11 @@ public class MemberController {
 		return "member/myPage";
 	}
 	
-	@RequestMapping(value="/myPage", method = RequestMethod.POST)
-	public String delAll(@RequestParam("del-num") int[] delNums) throws Exception {
+	@RequestMapping(value="/deleteAll", method = RequestMethod.POST)
+	public String delAll(@RequestParam(value="del-num", defaultValue = "-1") int[] delNums) throws Exception {
 		logger.info("delAll");
 		service.delAll(delNums);
-		
+
 		return "redirect:/member/myPage";
 	}
 	

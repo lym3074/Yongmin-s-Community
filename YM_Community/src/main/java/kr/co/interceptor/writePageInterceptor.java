@@ -12,6 +12,7 @@ public class writePageInterceptor extends HandlerInterceptorAdapter {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
+		/* preHandle 메소드의 파라미터는 request, response, handler로 구성된다. */
 		
 		HttpSession session = request.getSession();
 		MemberVO member = (MemberVO)session.getAttribute("member");

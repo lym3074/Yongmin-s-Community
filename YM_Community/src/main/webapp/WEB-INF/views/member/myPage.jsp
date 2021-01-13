@@ -10,6 +10,7 @@
         <title>Hello YongminLand</title>
 	    <link rel="stylesheet" href="/resources/css/mypage.css">
 	    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	    <script src="/resources/js/header.js"></script>
     </head>
     <body>
         <header id="header">
@@ -26,21 +27,6 @@
 		            <button id="btn-out" type="button">LogOut</button>
 		        </div>
 	        </c:if>
-        <script>
-	        $(document).ready(function() {
-				$("#btn-out").on("click",function() {
-					if(confirm("로그아웃하시겠습니까?")) {
-						location.href="/member/logout";
-						}
-					})
-	           })
-	           
-	        $(document).ready(function() {
-			$("#btn-mypage").on("click",function() {
-				location.href="/member/myPage";
-				})
-           })
-	    </script>
         </header>
     
         <main>
@@ -72,7 +58,7 @@
                 </tbody>
             </table>
 			
-			<form action="myPage" method="post">
+			<form action="deleteAll" method="post">
 	            <table class="writen-table">
 	                <thead>
 	                    <tr>
@@ -113,7 +99,7 @@
 							return;
 						else
 							return false;
-							})
+						})
 	            </script>
 			</form>
 			

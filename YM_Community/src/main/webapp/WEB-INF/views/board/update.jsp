@@ -65,7 +65,7 @@
                             <th>작성자</th>
                             <td class="align-center">${update.writer}</td>
                             <th>조회수</th>
-                            <td class="align-center">435</td>
+                            <td class="align-center">${update.hit}</td>
                         </tr>
                         <tr>
                             <th>첨부파일</th>

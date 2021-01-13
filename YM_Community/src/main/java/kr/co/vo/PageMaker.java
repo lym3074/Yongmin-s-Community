@@ -7,18 +7,14 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 public class PageMaker {
-	private int totalCount;
-	// 표시되는 페이지 번호 중 첫번째 번호
-	private int startPage;
-	// 표시되는 페이지 번호 중 마지막 번호
-	private int endPage;
-	//전체 페이지
-	private int totalPage;
-	private boolean prev;
-	private boolean next;
 	
-	// 한 번에 표시할 페이징 번호의 개수
-	private int displayPageNum = 5;
+	private int startPage; // 표시되는 페이지 번호 중 첫번째 번호
+	private int endPage; // 표시되는 페이지 번호 중 마지막 번호
+	private int totalCount; // 전체 게시물 수
+	private int totalPage; //전체 페이지
+	private boolean prev; // 이전 버튼을 위한 변수
+	private boolean next; // 다음 버튼을 위한 변수
+	private int displayPageNum = 5; // 한 번에 표시할 페이징 번호의 개수
 	private Criteria criteria;
 	
 	public void setCriteria(Criteria criteria) {
@@ -78,6 +74,7 @@ public class PageMaker {
 		next = endPage * criteria.getPerPageNum() >= totalCount?false:true;
 	}
 	
+	// myPage 게시판에 URL 식별을 위한 uriComponent 추가
 	public String makeQuery(int page) {
 		UriComponents uriComponents = UriComponentsBuilder
 				.newInstance()
@@ -88,7 +85,7 @@ public class PageMaker {
 		return uriComponents.toUriString();
 	}
 	
-
+	// 검색 기능이 포함된 Board list에 필요한 uri Component 추가
 	public String makeSearch(int page) {
 		UriComponents uriComponents = UriComponentsBuilder
 				.newInstance()
@@ -100,7 +97,8 @@ public class PageMaker {
 		
 		return uriComponents.toUriString();
 	}
-
+	
+	// 기본값 인코딩 메소드
 	private String encoding(String keyword) {
 		if(keyword == null || keyword.trim().length()==0) {
 			return "";

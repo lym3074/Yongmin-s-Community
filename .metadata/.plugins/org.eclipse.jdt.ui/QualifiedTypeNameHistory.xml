@@ -50,4 +50,5 @@
     <fullyQualifiedTypeName name="javax.servlet.http.HttpSession"/>
     <fullyQualifiedTypeName name="kr.co.vo.MemberVO"/>
     <fullyQualifiedTypeName name="java.io.PrintWriter"/>
+    <fullyQualifiedTypeName name="java.lang.NullPointerException"/>
 </qualifiedTypeNameHistroy>

@@ -8,6 +8,7 @@
     <title>Hello YongminLand</title>
     <link rel="stylesheet" href="/resources/css/join.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="/resources/js/header.js"></script>
     
 </head>
 <body>
@@ -112,24 +113,8 @@
                 alert('비밀번호가 맞지 않습니다. 확인 한번만~');
                 return false;
             }
-            
         }
     );
-
-    $(document).ready(function() {
-		$("#btn-out").on("click",function() {
-			if(confirm("로그아웃하시겠습니까?")) {
-				location.href="/member/logout";
-				}
-			})
-
-		$("#btn-mypage").on("click",function() {
-			location.href="/member/myPage";
-		})
-	})
-         
-	
- 
     </script>
 </body>
 </html>

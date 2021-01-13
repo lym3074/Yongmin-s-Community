@@ -6,27 +6,24 @@
 <html>
     <head>
         <meta charset="UTF-8">
-    <title>Hello YongminLand</title>
-    <link rel="stylesheet" href="/resources/css/detail.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	    <title>Hello YongminLand</title>
+	    <link rel="stylesheet" href="/resources/css/detail.css">
+	    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	    <script src="/resources/js/header.js"></script>
     </head>
     
 	<script>
     		$(document).ready(function(){
 				var formObj = $("form[role='form']"); // 같은 폼의 메소드가 여러 개일 때 지정
-        		
-				$("#btn-list").on("click",function() {
-					location.href = "/board/list?page=${Scriteria.page}"
-									+ "&perPageNum=${Scriteria.perPageNum}"
-									+ "&searchType=${Scriteria.searchType}&keyword=${Scriteria.keyword}";
-				})
 
+				<!-- 수정버튼 클릭 -->
 				$("#btn-update").on("click",function() {
 					formObj.attr("action", "/board/update");
 					formObj.attr("method","get");
 					formObj.submit();
 				})
-					
+				
+				<!-- 삭제 버튼 클릭-->
 				$("#btn-delete").on("click", function() {
 					if(confirm("삭제하시겠습니까?")) {
 						formObj.attr("action", "/board/delete");
@@ -34,16 +31,14 @@
 						formObj.submit();
 						}
 				})
-					
-				$("#btn-mypage").on("click",function() {
-					location.href="/member/myPage";
-				})
 
-				$("#btn-out").on("click",function() {
-					if(confirm("로그아웃하시겠습니까?")) {
-						location.href="/member/logout";
-						}
-					})
+				<!-- 목록 버튼 클릭 -->
+				$("#btn-list").on("click",function() {
+					location.href = "/board/list?page=${Scriteria.page}"
+									+ "&perPageNum=${Scriteria.perPageNum}"
+									+ "&searchType=${Scriteria.searchType}" 
+									+ "&keyword=${Scriteria.keyword}";
+				})
     		})
 	</script>
     

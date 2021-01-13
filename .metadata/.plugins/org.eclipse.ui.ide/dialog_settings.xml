@@ -70,4 +70,13 @@
 		<item value="org.springframework.ide.eclipse.webflow.feature:3.9.15.202010271126-CI-B2726"/>
 		<item value="org.springframework.ide.eclipse.xml.namespaces.feature:4.8.1.202010230733"/>
 	</list>
+	<section name="SmartImportWizard">
+		<item key="SmartImportRootWizardPage.STORE_HIDE_ALREADY_OPEN" value="false"/>
+		<item key="SmartImportRootWizardPage.STORE_CLOSE_IMPORTED" value="false"/>
+		<item key="SmartImportRootWizardPage.STORE_NESTED_PROJECTS" value="true"/>
+		<item key="SmartImportRootWizardPage.STORE_CONFIGURE_NATURES" value="true"/>
+		<list key="org.eclipse.ui.internal.wizards.datatransfer.SmartImportRootWizardPage.knownSources">
+			<item value="C:\Yongmin_Community"/>
+		</list>
+	</section>
 </section>

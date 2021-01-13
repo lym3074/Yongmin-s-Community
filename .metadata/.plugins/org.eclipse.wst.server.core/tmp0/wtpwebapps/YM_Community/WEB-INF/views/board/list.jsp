@@ -8,6 +8,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/resources/css/list.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="/resources/js/header.js"></script>
 </head>
 <body>
     <header id="header">
@@ -24,20 +25,6 @@
 	            <button id="btn-out" type="button">LogOut</button>
 	        </div>
         </c:if>
-    <script>
-        $(document).ready(function() {
-			$("#btn-out").on("click",function() {
-				if(confirm("로그아웃하시겠습니까?")) {
-					location.href="/member/logout";
-					}
-				})
-				
-			$("#btn-mypage").on("click",function() {
-					location.href="/member/myPage";
-				})
-           })
-           
-    </script>
     
     </header>
     <main class="main">
@@ -103,13 +90,15 @@
             <div class="page-move">
                 <ul>
                 	<c:if test="${pageMaker.prev}">
-                	<li><a href="list${pageMaker.makeSearch(pageMaker.startPage - 1)}">이전</a></li>
+                		<li><a href="list${pageMaker.makeSearch(pageMaker.startPage - 1)}">이전</a></li>
                 	</c:if>
+                	
                 	<c:forEach begin="${pageMaker.startPage}" end="${pageMaker.endPage }" var="idx">
-                    <li><a class="text-${(Scriteria.page==idx)?'bold':''}" href="list${pageMaker.makeSearch(idx)}">${idx}</a></li>
+                    	<li><a class="text-${(Scriteria.page==idx)?'bold':''}" href="list${pageMaker.makeSearch(idx)}">${idx}</a></li>
                     </c:forEach>
+                    
                     <c:if test="${pageMaker.next && pageMaker.endPage > 0}">
-                    <li><a href="list${pageMaker.makeSearch(pageMaker.endPage + 1)}">다음</a></li>  
+                    	<li><a href="list${pageMaker.makeSearch(pageMaker.endPage + 1)}">다음</a></li>  
                     </c:if>
                 </ul>
             </div>

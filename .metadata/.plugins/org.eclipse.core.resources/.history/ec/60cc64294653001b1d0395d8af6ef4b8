@@ -1,0 +1,20 @@
+src="https://code.jquery.com/jquery-3.5.1.min.js"
+src="/resources/css/home.css"
+let id = $('#userId');
+let pw = $('#userPwd');
+let btn = $('#btn');
+
+$(btn).on('click',function() {
+    if($(id).val() == "") {
+        $(id).next('label').addClass('warning');
+        setTimeout(function() {
+            $('label').removeClass('warning');
+        }, 1000);
+    }
+    else if($(pw).val() == "") {
+        $(pw).next('label').addClass('warning');
+        setTimeout(function() {
+            $('label').removeClass('warning');
+        }, 1000);
+    }
+});

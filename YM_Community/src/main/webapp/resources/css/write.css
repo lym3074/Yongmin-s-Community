@@ -114,7 +114,8 @@ main .table {
     margin-bottom:80px;
 }
 
-.confirmation input {
+.confirmation input,
+.confirmation button {
     width: 50px;
     height: 20px;
     background: #493D26;
@@ -123,15 +124,4 @@ main .table {
     border: none;
     cursor: pointer;
     border-radius: 5px;
-}
-
-.confirmation a {
-    padding:3.5px 15px 3.5px 15px;
-    width: 50px;
-    height: 20px;
-    text-decoration: none;
-    color:white;
-    font-size: 10px;
-    border-radius: 5px;
-    background: #493D26;
 }

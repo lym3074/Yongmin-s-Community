@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="Test" project="YM_Community" tests="3" started="3" failures="0" errors="0" ignored="0">
+  <testsuite name="kr.co.controller.Test" time="10.163">
+    <testcase name="sessionTest" classname="kr.co.controller.Test" time="7.846"/>
+    <testcase name="factoryTest" classname="kr.co.controller.Test" time="0.0"/>
+    <testcase name="connectionTest" classname="kr.co.controller.Test" time="2.302"/>
+  </testsuite>
+</testrun>

@@ -7,6 +7,8 @@
     <meta charset="UTF-8">
     <title>Hello YongminLand</title>
     <link rel="stylesheet" href="/resources/css/write.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script src="/resources/js/header.js"></script>
 </head>
 <body>
     <header id="header">
@@ -25,19 +27,19 @@
 	        </c:if>
         
     </header>
+    <c:if test="${member==null}">
+    	<script>
+			$("#btn-reg").on("click",function() {
+				alert("회원만 이용가능합니다. 로그인하십시오.");
+				location.href="/member/home";
+				})
+		</script>
+    </c:if>
     <script>
-        $(document).ready(function() {
-			$("#btn-out").on("click",function() {
-				if(confirm("로그아웃하시겠습니까?")) {
-					location.href="/member/logout";
-					}
-				})
-				
-			$("#btn-mypage").on("click",function() {
-					location.href="/member/myPage";
-				})
-           })
-    	</script>
+     $("#btn-cancel").on("click",function() {
+             location.href="/board/list";
+         })
+    </script>
     
     <main>
         <div class="list-title">
@@ -46,18 +48,18 @@
         </div>
 
         <form role="form" method="post" action="/board/write">
-            <div class="margin-top first">
+            <div class="write-content">
                 <table class="table">
                     <tbody>
                         <tr>
                             <th>제목</th>
-                            <td class="text-align-left text-indent text-strong text-orange" colspan="3">
+                            <td colspan="3">
                                 <input type="text" name="title"/>
                             </td>
                         </tr>
                         <tr class="second">
                             <th>첨부파일</th>
-                            <td colspan="3" class="text-align-left text-indent">
+                            <td colspan="3">
                                 <input type="file" name="file" /> 
                             </td>
                         </tr>
@@ -67,21 +69,12 @@
                         <tr class="content">
                             <td colspan="4"><textarea class="content" name="content"></textarea></td>
                         </tr>
-                        
                     </tbody>
                 </table>
             </div>
             <div class="confirmation">
-                <input id="btn-reg" class="btn-text btn-default" type="submit" value="등록" />
-                <a class="btn-text btn-cancel" href="list">취소</a>
-                <c:if test="${member==null}">
-                	<script>
-					$("#btn-reg").on("click",function() {
-						alert("회원만 이용가능합니다. 로그인하십시오.");
-						location.href="/member/home";
-						})
-                	</script>
-                </c:if>
+                <input id="btn-reg" type="submit" value="등록" />
+                <button id="btn-cancel" type="button">취소</button>     
             </div>
         </form>
     </main>

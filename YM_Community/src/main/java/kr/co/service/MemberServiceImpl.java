@@ -61,7 +61,7 @@ public class MemberServiceImpl implements MemberService {
 	
 	@Override
 	public void delAll(int[] delNums) throws Exception {
-		dao.delAll(delNums);
+			dao.delAll(delNums);
 	}
 	
 }

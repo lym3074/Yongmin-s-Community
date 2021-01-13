@@ -5,7 +5,461 @@
   <link rel="self" href="https://spring.io/blog.atom" />
   <id>http://spring.io/blog.atom</id>
   <icon>https://spring.io/favicon.ico</icon>
-  <updated>2021-01-06T00:00:00Z</updated>
+  <updated>2021-01-13T11:00:00Z</updated>
+  <entry>
+    <title>YMNNALFT: Express Yourself with SpEL</title>
+    <link rel="alternate" href="https://spring.io/blog/2021/01/13/ymnnalft-express-yourself-with-spel" />
+    <category term="engineering" label="Engineering" />
+    <author>
+      <name>Josh Long</name>
+    </author>
+    <id>tag:spring.io,2020-12-30:4319</id>
+    <updated>2021-01-13T11:00:00Z</updated>
+    <content type="html">&lt;p&gt;Welcome to another installment of &lt;em&gt;You May Not Need Another Library For That&lt;/em&gt; (YMNNALFT)! I&amp;rsquo;ve spent a lot of time since 2016 illuminating (or trying to, anyway!) some of the more enormous opportunities in the Spring ecosystem in &lt;a href="http://bit.ly/spring-tips-playlist"&gt;my Spring Tips videos&lt;/a&gt;. Today, however, I come to you in a different spirit, wanting to focus on the little, sometimes hidden, gems that do fantastic things and that might spare you an additional third-party dependency and its implied complexity. &lt;/p&gt;
+&lt;p&gt;Do your users want a convenient, bite-sized way to customize the behavior of your application? Expression Languages are purpose-built to allow low-touch customization of application behavior. Expression languages have a ton of applications. They can help you evaluate things! Perhaps they could run simple predicate logic that a user has configured. An expression language can dereference environment values, glue things together, support templating, customize access control and authorization predicates, support customized messaging flow routing and workflow event handler logic, and so much more. A good expression language is so useful that we built the Spring Expression Language (SpEL) and shipped it with Spring Framework 3.0 &lt;em&gt;waaaaay&lt;/em&gt; back in 2009! &lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;ll never forget &lt;em&gt;that&lt;/em&gt; addition! I was trawling the source code in Subversion, and I observed that &lt;a href="http://twitter.com/andy_clement"&gt;Andy Clement&lt;/a&gt; (one of our resident mad scientists and genuinely one of the neatest human beings I know) had added a &lt;em&gt;brand new&lt;/em&gt; expression language to Spring. &lt;/p&gt;
+&lt;p&gt;Of &lt;em&gt;course&lt;/em&gt; he did. &lt;/p&gt;
+&lt;p&gt;It&amp;rsquo;s worth noting here that the expression was a &lt;em&gt;superset&lt;/em&gt; of existing expression languages like &lt;a href="https://commons.apache.org/proper/commons-ognl/language-guide.html"&gt;OGNL&lt;/a&gt; and &lt;a href="https://docs.jboss.org/seam/2.3.1.Final/reference/html/elenhancements.html"&gt;JBoss EL&lt;/a&gt; (both of which provided more features than other expression languages of the day like those you&amp;rsquo;d find in Java Server Pages or Java Server Faces, for example). Andy had developed this new expression language over a few weeks. So, when I tell you that Andy Clement had (in a matter of weeks!) checked in a brand Expression Language that exceeded brand X, what that &lt;em&gt;should&lt;/em&gt; say to you is that Andy Clement can do anything and that we should all be delighted that&amp;rsquo;ll be on our side when the machines attack! &lt;/p&gt;
+&lt;p&gt;This new expression language used &lt;a href="https://www.antlr.org/"&gt;ANTLR&lt;/a&gt;, which is an awesome, powerful parser generator that, given a grammar definition, will generate Java code that knows how to parse whatever is defined in that grammar. So, you could use the ANTLR grammar to teach ANTLR about how to parse, let&amp;rsquo;s say, a hashtag (&lt;code&gt;#&lt;/code&gt; + &lt;code&gt;A_LABEL&lt;/code&gt;) or an ISO 8601 date or Java source code, or a SQL query, and ANTLR will generate Java code to parse text that complies with that grammar. It invokes callbacks when it encounters elements of that grammar. It is basically the JVM ecosystem equivalent of the classic Yacc / Lex toolchain, and you&amp;rsquo;re no doubt using software that in turn uses ANTLR to provide a parser. ANTLR is &lt;em&gt;awesome&lt;/em&gt;. You could write a Java compiler. A SQL parser. An email validator. An HTML parser. The sky&amp;rsquo;s the limit! It&amp;rsquo;s used by the best and brightest and so you can be assured that it &lt;em&gt;will&lt;/em&gt; work! It&amp;rsquo;s used in Groovy, Jython, Hibernate, MySQL Workbench, Apache Cassandra, Processing, Presto, Salesforce&amp;rsquo;s Apex, and countless other projects besides. &lt;/p&gt;
+&lt;p&gt;I was &lt;em&gt;impressed&lt;/em&gt;. &lt;/p&gt;
+&lt;p&gt;This expression language was looking great, and ANTLR is excellent, and it was solid engineering all around. &lt;/p&gt;
+&lt;p&gt;So, naturally, Andy removed ANTLR and replaced it with his own hand-written his own hand-rolled recursive descent parser! Amazing! (Who &lt;em&gt;DOES&lt;/em&gt; that?) &lt;/p&gt;
+&lt;p&gt;I was &lt;em&gt;SO&lt;/em&gt; impressed! &lt;/p&gt;
+&lt;img src ="https://i.imgflip.com/18xaq7.jpg"  /&gt;
+&lt;p&gt;SpEL is boss-sauce software, friends. It&amp;rsquo;s used all over the Spring ecosystem, in Spring Framework for evaluation purposes; in Spring Security for certain kinds of access control rules; in Spring Integration to evaluate expressions against messages; in Spring Data to tie specific queries to other contexts (like Spring Security). The list goes on. &lt;/p&gt;
+&lt;p&gt;In the intervening decade, SpEL has grown even more magical. It even has a compiler! That&amp;rsquo;s bananas because that compilation step can be entirely transparent to the user. And you can use it for whatever you&amp;rsquo;d like, both in Spring configuration and by itself, as a standalone library. &lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s look at an example. &lt;/p&gt;
+&lt;p&gt;You&amp;rsquo;ll need the following dependencies.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;This is included by default in every Spring Boot project on &lt;a href="http://start.spring.io"&gt;the Spring Initializr&lt;/a&gt; - &lt;code&gt;org.springframework.boot&lt;/code&gt; : &lt;code&gt;spring-boot-starter&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here&amp;rsquo;s the code:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint java"&gt;package bootiful.el;&#xD;
+&#xD;
+import lombok.Data;&#xD;
+import org.springframework.beans.factory.annotation.Value;&#xD;
+import org.springframework.boot.SpringApplication;&#xD;
+import org.springframework.boot.autoconfigure.SpringBootApplication;&#xD;
+import org.springframework.boot.context.event.ApplicationReadyEvent;&#xD;
+import org.springframework.context.ApplicationListener;&#xD;
+import org.springframework.context.annotation.Bean;&#xD;
+import org.springframework.expression.EvaluationContext;&#xD;
+import org.springframework.expression.Expression;&#xD;
+import org.springframework.expression.ExpressionParser;&#xD;
+import org.springframework.expression.spel.SpelCompilerMode;&#xD;
+import org.springframework.expression.spel.SpelParserConfiguration;&#xD;
+import org.springframework.expression.spel.standard.SpelExpressionParser;&#xD;
+import org.springframework.expression.spel.support.StandardEvaluationContext;&#xD;
+&#xD;
+@SpringBootApplication&#xD;
+public class BootifulApplication {&#xD;
+&#xD;
+	@Bean&#xD;
+	Bar bar(@Value(&amp;quot;#{ foo.name }&amp;quot;) String name) {&#xD;
+		return new Bar(name);&#xD;
+	}&#xD;
+&#xD;
+	@Bean&#xD;
+	Foo foo() {&#xD;
+		return new Foo();&#xD;
+	}&#xD;
+&#xD;
+	@Bean&#xD;
+	ApplicationListener&amp;lt;ApplicationReadyEvent&amp;gt; ready() {&#xD;
+		return event -&amp;gt; {&#xD;
+&#xD;
+			SpelParserConfiguration configuration = new SpelParserConfiguration(//&#xD;
+					SpelCompilerMode.IMMEDIATE, ClassLoader.getSystemClassLoader());&#xD;
+			ExpressionParser expressionParser = new SpelExpressionParser(configuration);&#xD;
+&#xD;
+			double randomProperty = evaluate(expressionParser, &amp;quot;randomProperty&amp;quot;, new MyContext());&#xD;
+			System.out.println(&amp;quot;randomProperty: &amp;quot; + randomProperty);&#xD;
+&#xD;
+			String uppercase = evaluate(expressionParser, &amp;quot;&amp;#39;andy clement for president&amp;#39;.toUpperCase()&amp;quot;, null);&#xD;
+			System.out.println(&amp;quot;uppercase: &amp;quot; + uppercase);&#xD;
+		};&#xD;
+	}&#xD;
+&#xD;
+	@SuppressWarnings(&amp;quot;unchecked&amp;quot;)&#xD;
+	private static &amp;lt;T&amp;gt; T evaluate(ExpressionParser expressionParser, String expression, Object context) {&#xD;
+		Expression expression2 = expressionParser.parseExpression(expression);&#xD;
+		if (context != null) {&#xD;
+			EvaluationContext evaluationContext = new StandardEvaluationContext(context);&#xD;
+			return (T) expression2.getValue(evaluationContext);&#xD;
+		} //&#xD;
+		else {&#xD;
+			return (T) expression2.getValue();&#xD;
+		}&#xD;
+	}&#xD;
+&#xD;
+	public static void main(String[] args) {&#xD;
+		System.setProperty(&amp;quot;spring.profiles.active&amp;quot;, &amp;quot;el&amp;quot;);&#xD;
+		SpringApplication.run(BootifulApplication.class, args);&#xD;
+	}&#xD;
+&#xD;
+}&#xD;
+&#xD;
+@Data&#xD;
+class Foo {&#xD;
+&#xD;
+	private String name = getClass().getName();&#xD;
+&#xD;
+}&#xD;
+&#xD;
+@Data&#xD;
+class Bar {&#xD;
+&#xD;
+	Bar(@Value(&amp;quot;#{ foo.name }&amp;quot;) String name) {&#xD;
+		System.out.println(&amp;quot;name: &amp;quot; + name);&#xD;
+	}&#xD;
+&#xD;
+}&#xD;
+&#xD;
+@Data&#xD;
+class MyContext {&#xD;
+&#xD;
+	private final double randomProperty = Math.random();&#xD;
+&#xD;
+	public int factorial(int n) {&#xD;
+		if (n == 0)&#xD;
+			return 1;&#xD;
+		else&#xD;
+			return (n * factorial(n - 1));&#xD;
+	}&#xD;
+&#xD;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here&amp;rsquo;s what I put into my &lt;code&gt;application.properties&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint properties"&gt;spring.main.web-application-type=none
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There are two things to look for in this application: using SpEL in a standalone context and using SpEL as part of your Spring application. &lt;/p&gt;
+&lt;p&gt;In the &lt;code&gt;ApplicationListener&amp;lt;ApplicationReadyEvent&amp;gt;&lt;/code&gt; I manually instantiate an instance of &lt;code&gt;SpelExpressionParser&lt;/code&gt;, against which I can evaluate SpEL expressions. I show how to configure a custom context (an object against which the expression may invoke methods and dereference properties) and use the expression language to call a method on a &lt;code&gt;String&lt;/code&gt; literal. &lt;/p&gt;
+&lt;p&gt;I also configure two beans, &lt;code&gt;Foo&lt;/code&gt; and &lt;code&gt;Bar&lt;/code&gt;. &lt;code&gt;Bar&lt;/code&gt; depends on a property in &lt;code&gt;Foo&lt;/code&gt;, &lt;code&gt;name&lt;/code&gt;, which dereferences that property using SpEL and then references other beans in the Spring application context.&lt;/p&gt;
+&lt;p&gt;Did you like this gem at a glance approach? Did you learn anything? As always, I&amp;rsquo;m keen on hearing from you, so &lt;a href="http://twitter.com/starbuxman"&gt;please sound off on Twitter (@starbuxman) &lt;/a&gt;! I&amp;rsquo;ll be back with another installment of &lt;em&gt;YMNNALFT&lt;/em&gt;, so be sure not to miss that. &lt;/p&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
+  <entry>
+    <title>This Week in Spring - January 12th, 2021</title>
+    <link rel="alternate" href="https://spring.io/blog/2021/01/12/this-week-in-spring-january-12th-2021" />
+    <category term="engineering" label="Engineering" />
+    <author>
+      <name>Josh Long</name>
+    </author>
+    <id>tag:spring.io,2021-01-13:4331</id>
+    <updated>2021-01-13T05:13:00Z</updated>
+    <content type="html">&lt;p&gt;I almost wrote in 2020! There&amp;rsquo;s been so much going on I almost forgot to take stock of the &lt;em&gt;year&lt;/em&gt;. What a rush. We better get to the roundup before I somehow lose even more track of time. So, without further ado, this week&amp;rsquo;s roundup.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2021/01/11/spring-framework-5-3-3-available-now"&gt;Spring Framework 5.3.3 is now available&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;I posted another installment of &lt;em&gt;You May Not Need a Library For That&lt;/em&gt;, this one looking at &lt;a href="https://spring.io/blog/2021/01/11/ymnnalft-http-clients"&gt;the fabulous &lt;code&gt;WebClient&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://spring.io/blog/2021/01/07/spring-data-s-migration-from-jira-to-github-issues"&gt;Spring Data&amp;rsquo;s Migration from Jira to GitHub Issues &lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;In last week&amp;rsquo;s installment of a &lt;a href="https://spring.io/blog/2021/01/07/a-bootiful-podcast-netty-and-armeria-founder-trustin-lee"&gt;Bootiful Podcast, I talked to Netty founder Trustin Lee&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;In last week&amp;rsquo;s installment of &lt;em&gt;You May Not Need a Library For That&lt;/em&gt;, I looked at &lt;a href="https://spring.io/blog/2021/01/06/ymnnalft-reactive-dataflow-with-project-reactor"&gt;reactive dataflow with project Reactor&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://twitter.com/shelajev/status/1347165207068610561?s=12"&gt;A useful sheet full of information about GraalVM&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://github.com/odrotbohm/spring-playground"&gt;Oliver Drotbohm&amp;rsquo;s collection of tiny helpers for building Spring applications&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;This is very cool: Ruchi Saini wrote a pretty long introduction on how to build &lt;a href="https://dzone.com/articles/how-to-create-microservices-using-spring"&gt;microservices with Spring (Cloud)&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Ram N. has published an interesting article looking at &lt;a href="https://dzone.com/articles/spring-boot-crud-operations-example-with-exception"&gt;Spring Boot CRUD operations with exception handling&lt;/a&gt;: nice!&lt;/li&gt;
+  &lt;li&gt;Ram N. also posted a video looking &lt;a href="https://dzone.com/articles/what-is-byname-auto-wiring-mode-in-spring"&gt;at Spring&amp;rsquo;s &lt;code&gt;byName&lt;/code&gt; auto-wiring mode&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
+  <entry>
+    <title>Spring Framework 5.3.3 available now</title>
+    <link rel="alternate" href="https://spring.io/blog/2021/01/11/spring-framework-5-3-3-available-now" />
+    <category term="releases" label="Releases" />
+    <author>
+      <name>St?phane Nicoll</name>
+    </author>
+    <id>tag:spring.io,2021-01-12:4330</id>
+    <updated>2021-01-12T07:06:00Z</updated>
+    <content type="html">&lt;p&gt;On behalf of the team and everyone who has contributed, I am pleased to announce that Spring Framework &lt;code&gt;5.3.3&lt;/code&gt; is available now.&lt;/p&gt;
+&lt;p&gt;Spring Framework &lt;code&gt;5.3.3&lt;/code&gt; includes &lt;a href="https://github.com/spring-projects/spring-framework/releases/tag/v5.3.3"&gt;40 fixes and improvements&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://projects.spring.io/spring-framework/"&gt;Project Page&lt;/a&gt; | &lt;a href="https://github.com/spring-projects/spring-framework"&gt;GitHub&lt;/a&gt; | &lt;a href="https://github.com/spring-projects/spring-framework/issues"&gt;Issues&lt;/a&gt; | &lt;a href="https://docs.spring.io/spring-framework/docs/5.3.3/spring-framework-reference"&gt;Documentation&lt;/a&gt;&lt;/p&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
+  <entry>
+    <title>YMNNALFT:  HTTP Clients</title>
+    <link rel="alternate" href="https://spring.io/blog/2021/01/11/ymnnalft-http-clients" />
+    <category term="engineering" label="Engineering" />
+    <author>
+      <name>Josh Long</name>
+    </author>
+    <id>tag:spring.io,2020-12-30:4318</id>
+    <updated>2021-01-11T11:00:00Z</updated>
+    <content type="html">&lt;p&gt;Welcome to another installment of &lt;em&gt;You May Not Need Another Library For That&lt;/em&gt; (YMNNALFT)! I&amp;rsquo;ve spent a lot of time since 2016 illuminating (or trying to, anyway!) some of the more enormous opportunities in the Spring ecosystem in &lt;a href="http://bit.ly/spring-tips-playlist"&gt;my Spring Tips videos&lt;/a&gt;. Today, however, I come to you in a different spirit, wanting to focus on the little, sometimes hidden, gems that do fantastic things and that might spare you an additional third-party dependency and its implied complexity. &lt;/p&gt;
+&lt;p&gt;Today we&amp;rsquo;re going to look at an all-in-one, handy dandy HTTP client, the &lt;code&gt;WebClient&lt;/code&gt;. &lt;/p&gt;
+&lt;p&gt;HTTP services are a common source of data. The web is an existence proof of the scalability and resilience of HTTP, and it makes a very compelling case for constraints on HTTP, like REST, when building network services. If HTTP is the lingua franca of the open web, then we must ask questions in HTTP. &lt;/p&gt;
+&lt;p&gt;There are some great libraries out there (like &lt;a href="http://hc.apache.org/"&gt;Apache HttpComponents Client&lt;/a&gt; and &lt;a href="https://square.github.io/okhttp/"&gt;OkHttp&lt;/a&gt;) that work in much the same way. If you haven&amp;rsquo;t got a particular one in mind but want a world-class option and are already using Spring, you could use the non-blocking, Netty-based HTTP client in Spring Webflux, the &lt;code&gt;WebClient&lt;/code&gt;. &lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;WebClient&lt;/code&gt; is the reactive, non-blocking alternative to the &lt;code&gt;RestTemplate&lt;/code&gt;. I love the &lt;code&gt;WebClient&lt;/code&gt; because it is non-blocking: the client thread used to make the network request won&amp;rsquo;t get hung up waiting for a network service response. This implies much better scalability - threads are free to be used for something else. I also love the &lt;code&gt;WebClient&lt;/code&gt; because it uses the Reactive Streams APIs, making composition &lt;em&gt;much&lt;/em&gt; easier. We just saw some of that in the last example. &lt;/p&gt;
+&lt;p&gt;You can use the &lt;code&gt;WebClient&lt;/code&gt; to talk to any old HTTP endpoint, not just those written using non-blocking or reactive APIs on the server-side. And, even better, you can use the &lt;code&gt;WebClient&lt;/code&gt; even in otherwise non-reactive code. What if - and just hear me out here - &lt;em&gt;what if&lt;/em&gt; somebody wanted to use the &lt;code&gt;WebClient&lt;/code&gt; but couldn&amp;rsquo;t use the full reactive Spring web stack? &lt;/p&gt;
+&lt;img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmedia.giphy.com%2Fmedia%2F1M9fmo1WAFVK0%2Fgiphy.gif&amp;f=1&amp;nofb=1" /&gt;
+&lt;p&gt;Search me! I can&amp;rsquo;t imagine why you&amp;rsquo;d not want to use the reactive HTTP stack. That&amp;rsquo;s OK even if you don&amp;rsquo;t because there&amp;rsquo;s still a lot of value in using the &lt;code&gt;WebClient&lt;/code&gt; all by its lonesome. You could use the &lt;code&gt;WebClient&lt;/code&gt; to make one or more HTTP calls and then concurrently compose the results. It&amp;rsquo;s ideal for easy scatter-gather kinds of composition. This is a natural thing to want to do even if you&amp;rsquo;re not otherwise using a reactive HTTP runtime, as might be the case if you&amp;rsquo;re running in a Servlet environment. &lt;/p&gt;
+&lt;p&gt;You&amp;rsquo;ll need the following dependencies to get the &lt;code&gt;WebClient&lt;/code&gt; on the classpath. &lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Reactive Web on &lt;a href="http://start.spring.io"&gt;the Spring Initializr&lt;/a&gt; - &lt;code&gt;org.springframework.boot&lt;/code&gt; : &lt;code&gt;spring-boot-starter-webflux&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let&amp;rsquo;s look at some code. This example does two different things (concurrently): &lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Initializes a new project using the HTTP API that powers &lt;a href="http://start.spring.io"&gt;the Spring Initializr&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;It retrieves all of the active open-source Spring projects using the Spring API&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code class="prettyprint java"&gt;package bootiful.httpclient.webclient;&#xD;
+&#xD;
+import lombok.ToString;&#xD;
+import org.springframework.beans.factory.annotation.Value;&#xD;
+import org.springframework.boot.SpringApplication;&#xD;
+import org.springframework.boot.autoconfigure.SpringBootApplication;&#xD;
+import org.springframework.boot.context.event.ApplicationReadyEvent;&#xD;
+import org.springframework.context.ApplicationListener;&#xD;
+import org.springframework.context.annotation.Bean;&#xD;
+import org.springframework.core.io.buffer.DataBuffer;&#xD;
+import org.springframework.core.io.buffer.DataBufferUtils;&#xD;
+import org.springframework.http.MediaType;&#xD;
+import org.springframework.scheduling.annotation.EnableAsync;&#xD;
+import org.springframework.web.reactive.function.client.WebClient;&#xD;
+import reactor.core.publisher.Mono;&#xD;
+&#xD;
+import java.net.URI;&#xD;
+import java.nio.file.Path;&#xD;
+import java.util.ArrayList;&#xD;
+import java.util.Collection;&#xD;
+&#xD;
+import static java.nio.file.StandardOpenOption.CREATE;&#xD;
+&#xD;
+@EnableAsync&#xD;
+@SpringBootApplication&#xD;
+public class BootifulApplication {&#xD;
+&#xD;
+	public static void main(String[] args) {&#xD;
+		SpringApplication.run(BootifulApplication.class, args);&#xD;
+	}&#xD;
+&#xD;
+	@Bean&#xD;
+	WebClient webClient(WebClient.Builder builder) {&#xD;
+		return builder//&#xD;
+				.filter(//&#xD;
+						(clientRequest, exchangeFunction) -&amp;gt; exchangeFunction//&#xD;
+								.exchange(clientRequest)//&#xD;
+								.doOnNext(response -&amp;gt; System.out.println(&amp;quot;got a WebClient response: &amp;quot; + response))//&#xD;
+				) //&#xD;
+				.build();&#xD;
+	}&#xD;
+&#xD;
+	@Bean&#xD;
+	ApplicationListener&amp;lt;ApplicationReadyEvent&amp;gt; ready(@Value(&amp;quot;file://${user.home}/Desktop/output.zip&amp;quot;) Path output,&#xD;
+			WebClient client) {&#xD;
+&#xD;
+		return event -&amp;gt; {&#xD;
+&#xD;
+			// initialize a new Spring Boot project .zip archive&#xD;
+			Mono&amp;lt;DataBuffer&amp;gt; db = client.get()//&#xD;
+					.uri(URI.create(&amp;quot;https://start.spring.io/starter.zip&amp;quot;))//&#xD;
+					.accept(MediaType.APPLICATION_OCTET_STREAM)//&#xD;
+					.retrieve()//&#xD;
+					.bodyToMono(DataBuffer.class);&#xD;
+&#xD;
+			// gets written out to ~/output.zip&#xD;
+			Mono&amp;lt;Boolean&amp;gt; write = DataBufferUtils.write(db, output, CREATE).thenReturn(true);&#xD;
+&#xD;
+			// enumerate all the active Spring projects using the&#xD;
+			// JSON API while we&amp;#39;re at it...&#xD;
+			Mono&amp;lt;ProjectsResponse&amp;gt; json = client//&#xD;
+					.get()//&#xD;
+					.uri(URI.create(&amp;quot;https://spring.io/api/projects&amp;quot;))//&#xD;
+					.retrieve()//&#xD;
+					.bodyToMono(ProjectsResponse.class);&#xD;
+&#xD;
+			// look ma! No threading code! this will launch both network&#xD;
+			// calls (the .zip and the json) at the same time&#xD;
+			Mono.zip(write, json).subscribe(tuple -&amp;gt; enumerate(tuple.getT2()));&#xD;
+		};&#xD;
+	}&#xD;
+&#xD;
+	private void enumerate(ProjectsResponse pr) {&#xD;
+		pr._embedded //&#xD;
+				.projects //&#xD;
+						.stream() //&#xD;
+						.filter(p -&amp;gt; p.status.equalsIgnoreCase(&amp;quot;active&amp;quot;)) //&#xD;
+						.forEach(project -&amp;gt; System.out.println(project.toString()));&#xD;
+	}&#xD;
+&#xD;
+}&#xD;
+&#xD;
+@ToString&#xD;
+class ProjectsResponse {&#xD;
+&#xD;
+	public Embedded _embedded = new Embedded();&#xD;
+&#xD;
+	@ToString&#xD;
+	public static class Project {&#xD;
+&#xD;
+		public String name, slug, status, repositoryUrl;&#xD;
+&#xD;
+	}&#xD;
+&#xD;
+	@ToString&#xD;
+	public static class Embedded {&#xD;
+&#xD;
+		public Collection&amp;lt;Project&amp;gt; projects = new ArrayList&amp;lt;&amp;gt;();&#xD;
+&#xD;
+	}&#xD;
+&#xD;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If you want to bring in the &lt;code&gt;WebClient,&lt;/code&gt; but _ don&amp;rsquo;t_ want to use the rest of the reactive web stack, then you&amp;rsquo;ll need to tell Spring Boot. Spring Boot will attempt to standup a Netty-based Spring Webflux environment, otherwise. You&amp;rsquo;ll need the following configuration in your &lt;code&gt;application.properties&lt;/code&gt;. &lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint properties"&gt;spring.main.web-application-type=none
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Did you like this gem at a glance approach? Did you learn anything? As always, I&amp;rsquo;m keen on hearing from you, so &lt;a href="http://twitter.com/starbuxman"&gt;please sound off on Twitter (@starbuxman) &lt;/a&gt;! I&amp;rsquo;ll be back with another installment of &lt;em&gt;YMNNALFT&lt;/em&gt;, so be sure not to miss that. &lt;/p&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
+  <entry>
+    <title>Spring Data's Migration from Jira to GitHub Issues</title>
+    <link rel="alternate" href="https://spring.io/blog/2021/01/07/spring-data-s-migration-from-jira-to-github-issues" />
+    <category term="engineering" label="Engineering" />
+    <author>
+      <name>Mark Paluch</name>
+    </author>
+    <id>tag:spring.io,2020-12-31:4327</id>
+    <updated>2021-01-08T03:15:00Z</updated>
+    <content type="html">&lt;p&gt;Spring Data has migrated its entire history of issues from Jira to GitHub. The goal of this blog post is to give you context and details about this migration.&lt;/p&gt;&lt;h1&gt;&lt;a href="#migration-details" class="anchor" name="migration-details"&gt;&lt;/a&gt;Migration Details&lt;/h1&gt;
+&lt;p&gt;Spring Data issues have been managed for over ten years in Jira. Today, every issue and every comment has been imported into GitHub. There is a lot to consider in such a move, so let&amp;rsquo;s take a tour and go over some details.&lt;/p&gt;
+&lt;p&gt;Spring Data consists of 19 individual projects, each one of which is associated with its own issue tracker namespace. Four projects (Spring Data Build, BOM, Envers, and R2DBC) have been using GitHub. One project (Spring Data GemFire) was not migrated as it is in maintenance mode and is going end of life soon.&lt;br/&gt;During this migration, we migrated almost 15,000 tickets from 14 Jira projects into 14 GitHub repositories. &lt;/p&gt;&lt;h3&gt;&lt;a href="#jira-details" class="anchor" name="jira-details"&gt;&lt;/a&gt;Jira Details&lt;/h3&gt;
+&lt;p&gt;Every imported issue displays information from Jira in the bottom half of its description. The goal was that all information from Jira is available on GitHub, and you don&amp;rsquo;t have to go back and forth between the two. You may see one or more of the following, when available:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Affected versions&lt;/li&gt;
+  &lt;li&gt;Reference URL&lt;/li&gt;
+  &lt;li&gt;Attachments&lt;/li&gt;
+  &lt;li&gt;Related issues&lt;/li&gt;
+  &lt;li&gt;Pull requests and commit references&lt;/li&gt;
+  &lt;li&gt;Backport versions&lt;/li&gt;
+  &lt;li&gt;Vote and watcher counts&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Note that votes and watch subscriptions could not be carried over to GitHub. Even if &lt;code&gt;spring-issuemaster&lt;/code&gt; has full privileges, it can only vote once, and it cannot vote on someone else&amp;rsquo;s behalf. So please visit GitHub issues to re-apply reactions and subscribe to receive updates for specific issues.&lt;/p&gt;&lt;h3&gt;&lt;a href="#labels" class="anchor" name="labels"&gt;&lt;/a&gt;Labels&lt;/h3&gt;
+&lt;p&gt;Some Jira fields were converted to GitHub issue labels:&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Jira Field &lt;/th&gt;
+      &lt;th&gt;Label&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Issue Type &lt;/td&gt;
+      &lt;td&gt;&lt;code&gt;&amp;quot;type: *&amp;quot;&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Status &lt;/td&gt;
+      &lt;td&gt;&lt;code&gt;&amp;quot;status: *&amp;quot;&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Resolution &lt;/td&gt;
+      &lt;td&gt;&lt;code&gt;&amp;quot;status: *&amp;quot;&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Component &lt;/td&gt;
+      &lt;td&gt;&lt;code&gt;&amp;quot;in: *&amp;quot;&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Two extra labels were also applied to imported issues:&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Label &lt;/th&gt;
+      &lt;th&gt;Description&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code&gt;&amp;quot;has: votes-jira&amp;quot;&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;imported issues with 10+ votes&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code&gt;&amp;quot;has: backports&amp;quot;&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;issues with backport versions&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;We used the opportunity to streamline the Jira field values over all repositories. Components are reflected through &lt;code&gt;&amp;quot;in: *&amp;quot;&lt;/code&gt; labels. The &lt;code&gt;&amp;quot;status: *&amp;quot;&lt;/code&gt; and &lt;code&gt;&amp;quot;type: *&amp;quot;&lt;/code&gt; labels have also been given extra thought and revised. A typical Spring Data project has the following components:&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Label &lt;/th&gt;
+      &lt;th&gt;Description&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code&gt;&amp;quot;in: core&amp;quot;&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;Core support&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code&gt;&amp;quot;in: mapping&amp;quot;&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;Mapping metadata and converter infrastructure&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;code&gt;&amp;quot;in: repository&amp;quot;&lt;/code&gt;&lt;/td&gt;
+      &lt;td&gt;Repository abstraction&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Depending on the actual project, you can find additional components, such as &lt;code&gt;&amp;quot;in: aggegation-framework&amp;quot;&lt;/code&gt; for Spring Data MongoDB. Therefore, you might find components in &lt;a href="https://github.com/spring-projects/spring-data-rest/labels"&gt;Spring Data REST&lt;/a&gt; that do not exist in &lt;a href="https://github.com/spring-projects/spring-data-jpa/labels"&gt;Spring Data JPA&lt;/a&gt;.. &lt;/p&gt;
+&lt;p&gt;Our choice of labels is aligned with the labels used in Spring Boot and Spring Framework. The Boot team has given their process and labels a lot of thought, and we know many people will appreciate the consistency. See the complete &lt;a href="https://github.com/spring-projects/spring-data-commons/labels"&gt;set of labels&lt;/a&gt; for &lt;a href="https://github.com/spring-projects/spring-data-commons"&gt;Spring Data Commons&lt;/a&gt;. &lt;/p&gt;
+&lt;p&gt;In Jira, many fields and labels are modifiable. In GitHub, only contributors can add or remove labels. This makes perfect sense. Reporters simply describe the issue, while contributors categorize it. Both developers and contributors can use the labels to search.&lt;/p&gt;
+&lt;p&gt;Going forward, Spring Data adopts a bit of automation such that each new ticket must be triaged by the project team before a ticket is accepted as a feature request or a bug report.&lt;/p&gt;&lt;h3&gt;&lt;a href="#fix-versions" class="anchor" name="fix-versions"&gt;&lt;/a&gt;Fix Versions&lt;/h3&gt;
+&lt;p&gt;A Jira issue can have multiple fix versions, while a GitHub issue can have only one target milestone. This feels like a drawback, but there is more than is apparent to the eye, and the constraint has forced us to consider some meaningful adjustments.&lt;/p&gt;
+&lt;p&gt;Take &lt;a href="https://jira.spring.io/browse/DATACMNS-715?redirect=false"&gt;DATACMNS-715&lt;/a&gt;, for example, with fix versions &lt;code&gt;1.8.6&lt;/code&gt;, &lt;code&gt;1.9.3&lt;/code&gt;, &lt;code&gt;1.10.1&lt;/code&gt;, and &lt;code&gt;1.11 RC1&lt;/code&gt;. While the issue was fixed in all four versions, there is no way to express these using milestones. We can instead say it was fixed in &lt;code&gt;1.8.6&lt;/code&gt; and forward-ported to all other versions. This is how it shows on the GitHub issue &lt;a href="https://github.com/spring-projects/spring-framework/issues/21759"&gt;#21759&lt;/a&gt;. Could we have made this adjustment in the past? Sure, but the support for multiple fix versions in Jira didn&amp;rsquo;t force us to do so.&lt;/p&gt;&lt;h3&gt;&lt;a href="#markup" class="anchor" name="markup"&gt;&lt;/a&gt;Markup&lt;/h3&gt;
+&lt;p&gt;The markup was, without a doubt the most significant and most painful part of the migration. A ten-year history of issue tracking reflects big shifts in programming styles that in turn determine what shows up in comments. &lt;/p&gt;
+&lt;p&gt;For example, lots of XML was pasted in comments in the beginning, and Markdown treats that as &lt;a href="https://spec.commonmark.org/0.28/#html-blocks"&gt;HTML blocks&lt;/a&gt;, which results in the tags not showing at all. Of course if those were surrounded with &lt;code&gt;{code:xml}...{code}&lt;/code&gt;, it would look fine, but in those days, markup wasn&amp;rsquo;t commonly used and the XML snippets showed up anyway, so it didn&amp;rsquo;t force the issue and, consequently, made it impossible to migrate properly.&lt;/p&gt;
+&lt;p&gt;There are many other intricacies (such as the escaping of curly braces, avoiding the effect of monospacing, or escaping asterisks to prevent them from disappearing as markup for bold). I&amp;rsquo;ll spare you the details. Suffice it to say that we put a lot of effort into making sure the markup conversion quality is reasonably high.&lt;/p&gt;
+&lt;p&gt;One specific issue to highlight is the use of &amp;ldquo;@&amp;rdquo; in plain text (that is, outside of code blocks). Those are user mentions on GitHub that trigger notifications. You might be surprised that &lt;a href="https://github.com/query"&gt;@Query&lt;/a&gt;, &lt;a href="https://github.com/modifying"&gt;@Modifying&lt;/a&gt;, &lt;a href="https://github.com/configuration"&gt;@Configuration&lt;/a&gt; are actual GitHub users. This is why we&amp;rsquo;ve taken care to escape them. Going forward, when creating new issues or comments, please be a good GitHub citizen and use backticks (for example, `@Query`.&lt;/p&gt;&lt;h1&gt;&lt;a href="#background" class="anchor" name="background"&gt;&lt;/a&gt;Background&lt;/h1&gt;
+&lt;p&gt;We&amp;rsquo;ve used and liked Jira for a long time. The idea of migrating to GitHub Issues did not come to our team immediately. Jira seemed too essential. Over time, we&amp;rsquo;ve seen a growth in adoption of GitHub issues. Some of our projects used GitHub already and, for newer projects, such as Envers and R2DBC, we&amp;rsquo;ve used GitHub issues right from the start. We also see an elevated use of Markdown in Jira. Finally, the way we see our projects as a team is pretty fragmented, as there&amp;rsquo;s no single view over all tickets to work on.&lt;/p&gt;
+&lt;p&gt;GitHub is the home of just about every open source project, including &lt;em&gt;every&lt;/em&gt; Spring project, and all users can be reasonably expected to have GitHub credentials. As a result, it has become untenable today to expect developers to maintain a separate login for the issue tracker of every open source project they depend on or want to report an issue against.&lt;/p&gt;
+&lt;p&gt;Then there are the benefits of co-locating source code and issues. I&amp;rsquo;ve mentioned many of those earlier, like the &lt;a href="https://help.github.com/articles/autolinked-references-and-urls/"&gt;autolinked references&lt;/a&gt; across issues, pull requests, source code and commits, within a single project and across all projects on GitHub and the ability to mention and notify any GitHub user. All of those are very powerful benefits that are simply not possible with siloed issue tracking. I doubt anyone wants to go back to the days when open source projects were hosted in different places. The same is true for issue tracking.&lt;/p&gt;
+&lt;p&gt;There are deeper, less obvious benefits for co-located source code and issues. GitHub treats issues and pull requests equally. They are assigned numbers from the same sequence, they look the same (description, comments, labels, and target milestone), they appear in release notes without distinction. A pull request is nothing but an issue with commits attached.&lt;/p&gt;
+&lt;p&gt;Historically, in the Spring Data projects, we required a Jira issue for every pull request. We didn&amp;rsquo;t like the burden either, but we needed a single place of record for all issues. As a consequence of this split situation, it was never too clear what should be discussed under the pull request and how much belongs in the Jira issue. &lt;/p&gt;
+&lt;p&gt;Going forward, this is no longer a problem. We expect either an issue or a pull request, not both. If you need to start with a discussion first, which we &lt;em&gt;do&lt;/em&gt; encourage, create an issue, and later, if you submit a pull request, the PR will supersede the issue. The two are still linked, and nothing is lost. The conversation follows the action.&lt;/p&gt;
+&lt;p&gt;Not to be overlooked is the markup question. There is no doubt that using different markup variants depending on the issue tracker is painful.&lt;br/&gt;There is also no question that Markdown is widely used and easy to use in code-related discussions. It requires less typing compared to Jira&amp;rsquo;s Wiki markup and it just works when it comes to formatting code, because it&amp;rsquo;s simpler and does not clash with symbols that commonly appear in code. This has looked obvious to me from the start, since I&amp;rsquo;ve also used GitHub and Markdown in parallel for years. Jira is about the oldest Atlassian product so there&amp;rsquo;s a bit of history of why there&amp;rsquo;s no out of the box support for Markdown. To be clear, this wasn&amp;rsquo;t a decisive factor. It&amp;rsquo;s just one of those things you learn to live with that can later become extra incentive for change.&lt;/p&gt;
+&lt;p&gt;Last but not least, today, most developers use Spring through Spring Boot, which has always used GitHub Issues. Spring Framework has used GitHub Issues for two years. From that perspective alone, there is enough incentive for Spring Data to migrate and to create a more consistent experience for Spring users.&lt;/p&gt;
+&lt;p&gt;Migrating to GitHub issues gives us, as a team, an opportunity to reconsider or commit message format. Since its inception, Spring Data messages followed the pattern of &lt;a href="https://github.com/spring-projects/spring-data-commons/commit/2b7c5552738763dfec299695c4a17086af9b3b0b"&gt;&lt;code&gt;&amp;lt;ticketnumber&amp;gt; - summary.&lt;/code&gt;&lt;/a&gt;. That format worked well for us in the past. With migrating to GitHub, the ticket number starts with a hash (&lt;code&gt;#&lt;/code&gt;), which is typically used as a comment character. As a consequence, changing commit messages or amending commits becomes a burden, as each committer needs to tune their Git config to not consider &lt;code&gt;#&lt;/code&gt; a comment character. Going forward, GitHub allows &lt;a href="https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword"&gt;closing tickets and pull requests by referencing the ticket in a commit message&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Our future commit messages therefore will look more like:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="prettyprint"&gt;Summary.&#xD;
+&#xD;
+Body comes here.&#xD;
+&#xD;
+Original pull request #456&#xD;
+Closes #123
+&lt;/code&gt;&lt;/pre&gt;&lt;h1&gt;&lt;a href="#the-actual-migration" class="anchor" name="the-actual-migration"&gt;&lt;/a&gt;The Actual Migration&lt;/h1&gt;
+&lt;hr/&gt;
+&lt;p&gt;Despite a lot of preparation, there is nothing like the day of the actual migration. We used GitHub&amp;rsquo;s unofficial &lt;a href="https://gist.github.com/jonmagic/5282384165e0f86ef105"&gt;import API&lt;/a&gt;, which is documented to not trigger any notifications. Once in a while, the import of individual issues failed because of their body size. Especially pasting raw &lt;code&gt;StackOverflowExceptions&lt;/code&gt; causes large issue bodies that need to be truncated.&lt;/p&gt;
+&lt;p&gt;With that in mind, we migrated all 14 projects over the course of two days. It took another few hours to make a second pass over all issues and comments to replace Jira issue keys with GitHub reference numbers.&lt;/p&gt;
+&lt;p&gt;All of that is now complete, and it is my pleasure to announce we are now open for business on GitHub Issues.&lt;/p&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
+  <entry>
+    <title>A Bootiful Podcast: Netty and Armeria founder Trustin Lee</title>
+    <link rel="alternate" href="https://spring.io/blog/2021/01/07/a-bootiful-podcast-netty-and-armeria-founder-trustin-lee" />
+    <category term="engineering" label="Engineering" />
+    <author>
+      <name>Josh Long</name>
+    </author>
+    <id>tag:spring.io,2021-01-08:4329</id>
+    <updated>2021-01-08T02:15:00Z</updated>
+    <content type="html">&lt;p&gt;Hi, Spring fans! In this episode &lt;a href="http://twitter.com/starbuxman"&gt;Josh Long (@starbuxman)&lt;/a&gt; talks to Netty and Armeria founder &lt;a href="http://twitter.com/trustin"&gt;Trustin Lee (@trustin)&lt;/a&gt;.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href="http://Armeria.dev"&gt;Armeria&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://netty.io/"&gt;Netty&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://mina.apache.org/"&gt;Apache Mina &lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://twitter.com/trustin"&gt;Trustin&amp;rsquo;s Twitter&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://twitter.com/trustin_ko"&gt;Trustin&amp;rsquo;s Twitter in Korean&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://t.motd.kr/"&gt;Blog&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://www.youtube.com/playlist?list=PLuWz7MpEAx_fPDwy0yus3SJdzWVtu3mwc"&gt;Trustin&amp;rsquo;s Talks&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://speakerdeck.com/trustin"&gt;Speaker Deck&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Chat with Trustin in the &lt;a href="https://armeria.dev/s/slack"&gt;Armeria Slack workspace&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;iframe title="Netty and Armeria founder Trustin Lee" height="122" width="100%" style="border: none;" scrolling="no" data-name="pb-iframe-player" src="https://www.podbean.com/media/player/4r7nq-f6fcf5?from=pb6admin&amp;download=1&amp;version=1&amp;auto=0&amp;share=1&amp;download=1&amp;rtl=0&amp;fonts=Helvetica&amp;skin=1&amp;pfauth=&amp;btn-skin=107"&gt;&lt;/iframe&gt;
+&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
+  </entry>
   <entry>
     <title>YMNNALFT: Reactive Dataflow with Project Reactor</title>
     <link rel="alternate" href="https://spring.io/blog/2021/01/06/ymnnalft-reactive-dataflow-with-project-reactor" />
@@ -14,7 +468,7 @@
       <name>Josh Long</name>
     </author>
     <id>tag:spring.io,2020-12-30:4317</id>
-    <updated>2021-01-06T00:00:00Z</updated>
+    <updated>2021-01-05T23:00:00Z</updated>
     <content type="html">&lt;p&gt;Welcome to another installment of &lt;em&gt;You May Not Need Another Library For That&lt;/em&gt; (YMNNALFT)! I&amp;rsquo;ve spent a lot of time since 2016 illuminating (or trying to, anyway!) some of the more enormous opportunities in the Spring ecosystem in &lt;a href="http://bit.ly/spring-tips-playlist"&gt;my Spring Tips videos&lt;/a&gt;. Today, however, I come to you in a different spirit, wanting to focus on the little, sometimes hidden, gems that do fantastic things and that might spare you an additional third-party dependency and its implied complexity. &lt;/p&gt;
 &lt;p&gt;And it&amp;rsquo;s a good thing we&amp;rsquo;re covering some of these complexity-reducing gems, too, you see, because the world is a confusing, complex, and dizzying place, and nowhere is that more evident than in the world of reactive data stream composition. Life comes at you fast and data, even more so. Data originates from everything (network services, databases, in-memory computation, threaded code, etc.). Data comes in many different sizes and shapes (one record, ten records, infinite records, etc.). Data comes in different volumes, starving or overwhelming its consumers. Data arrives at different cadences and times: now, later, all at once, periodically, etc. It&amp;rsquo;s much more natural to talk about data that&amp;rsquo;s already in memory, in hand, so to speak, than data that hasn&amp;rsquo;t yet materialized. And it&amp;rsquo;s more natural to talk about data in the single-threaded case than to deal with it in the concurrent case. &lt;/p&gt;
 &lt;img src = "https://media1.tenor.com/images/e6494f3096cf60a3832e0775936bf9cb/tenor.gif" /&gt;
@@ -96,7 +550,7 @@ public class BootifulApplication {&#xD;
       <name>Josh Long</name>
     </author>
     <id>tag:spring.io,2021-01-05:4328</id>
-    <updated>2021-01-05T21:10:37Z</updated>
+    <updated>2021-01-05T20:10:37Z</updated>
     <content type="html">&lt;p&gt;Hi, Spring fans! Happy new year! And welcome to another installment of &lt;em&gt;This Week in Spring&lt;/em&gt;! Today is a significant installment because it marks a decade of &lt;em&gt;This Week in Spring&lt;/em&gt;! &lt;/p&gt;
 &lt;p&gt;I started this roundup after a fun discussion with the legendarily nice guy and SpringSource co-founder Keith Donald in late 2010 over the holiday. Lo, the first &lt;a href="http://web.archive.org/web/20110107071916/http://www.springsource.org/node/2986"&gt;week of January 2011&lt;/a&gt;, the first edition of this roundup went out the door on the old SpringSource.org blog. &lt;/p&gt;
 &lt;p&gt;It&amp;rsquo;s been so much fun putting together this roundup, without fail, every Tuesday for the last decade. You wouldn&amp;rsquo;t believe the lengths to which I went to get this out on Tuesday, well, &lt;em&gt;my&lt;/em&gt; Tuesday, no matter where I was. I&amp;rsquo;d be on planes all the time and the original blog software on SpringSource.org didn&amp;rsquo;t support scheduling posts, so I&amp;rsquo;d either publish it a little early or - if I was going to be on a plane for the entirety of the useful day - I&amp;rsquo;d have my then manager &lt;a href="https://twitter.com/devrelchap"&gt;Adam Fitzgerald&lt;/a&gt; post it for me. He reviewed the content for the first few years of the blog, too. What a legend that guy is. I learned a ton (about everything really, but also writing in particular) working with him. Nowadays, most flights longer than an hour or two have wi-fi onboard; but not so back then. Nowadays the software we use to blog - custom, open-source software that we built with Spring back in 2013 that underpins the &lt;a href="https://github.com/spring-io/sagan"&gt;spring.io&lt;/a&gt;) experience - supports scheduled posts, as well, so it&amp;rsquo;s much easier to get this post out on time. &lt;/p&gt;
@@ -131,7 +585,7 @@ public class BootifulApplication {&#xD;
       <name>Josh Long</name>
     </author>
     <id>tag:spring.io,2020-12-30:4315</id>
-    <updated>2021-01-04T12:00:00Z</updated>
+    <updated>2021-01-04T11:00:00Z</updated>
     <content type="html">&lt;p&gt;Welcome to another installment of &lt;em&gt;You May Not Need Another Library For That&lt;/em&gt; (&lt;code&gt;#YMNNALFT&lt;/code&gt;)! I&amp;rsquo;ve spent a lot of time since 2016 illuminating (or trying to, anyway!) some of the more enormous opportunities in the Spring ecosystem in &lt;a href="http://bit.ly/spring-tips-playlist"&gt;my Spring Tips videos&lt;/a&gt;. Today, however, I come to you in a different spirit, wanting to focus on the little, sometimes hidden, gems that do fantastic things and that might spare you an additional third-party dependency and its implied complexity. &lt;/p&gt;
 &lt;p&gt;Have you tried out &lt;a href="https://paketo.io"&gt;Paketo&lt;/a&gt;? It&amp;rsquo;s neat-o! It alleviates one of the biggest pains of cloudy software these days:&lt;a href="https://docs.docker.com/engine/reference/builder/"&gt;Dockerfiles&lt;/a&gt;. &lt;/p&gt;
 &lt;p&gt;As an aside: the &lt;em&gt;biggest&lt;/em&gt; pain point is, of course, YAML. YAML is why people leave IT! YAML: when you want the indentation-sensitive treachery of Python, with the nonexistent design-time validation of Python and &lt;em&gt;none&lt;/em&gt; of the benefits of Python. YAML: because life is, clearly, not hard enough. 9/10 dentists agree: YAML causes production rot!&lt;/p&gt;
@@ -166,7 +620,7 @@ public class BootifulApplication {&#xD;
       <name>Josh Long</name>
     </author>
     <id>tag:spring.io,2020-12-31:4326</id>
-    <updated>2020-12-31T02:45:36Z</updated>
+    <updated>2020-12-31T01:45:36Z</updated>
     <content type="html">&lt;p&gt;Hi, Spring fans! Welcome to another installment of A Bootiful Podcast and happy new year! In this episode, &lt;a href="http://twitter.com/starbuxman"&gt;Josh Long (@starbuxman)&lt;/a&gt; talks to Google&amp;rsquo;s &lt;a href="https://github.com/dzou"&gt;Daniel Zou &lt;/a&gt;. &lt;/p&gt;
 &lt;p&gt;Happy New Year! &lt;/p&gt;
 &lt;iframe title="Google's Daniel Zou on Spring Cloud GCP, GraalVM and more" height="122" width="100%" style="border: none;" scrolling="no" data-name="pb-iframe-player" src="https://www.podbean.com/media/player/kkk5w-f64f08?from=pb6admin&amp;download=1&amp;version=1&amp;auto=0&amp;share=1&amp;download=1&amp;rtl=0&amp;fonts=Helvetica&amp;skin=1&amp;pfauth=&amp;btn-skin=107"&gt;&lt;/iframe&gt;
@@ -179,8 +633,8 @@ public class BootifulApplication {&#xD;
     <author>
       <name>Josh Long</name>
     </author>
-    <id>tag:spring.io,2020-12-31:4325</id>
-    <updated>2020-12-31T00:23:56Z</updated>
+    <id>tag:spring.io,2020-12-30:4325</id>
+    <updated>2020-12-30T23:23:56Z</updated>
     <content type="html">&lt;p&gt;Hi, Spring fans! &lt;/p&gt;
 &lt;p&gt;You know what I did? I goofed, people. I accidentally &lt;a href="https://spring.io/blog/2020/12/29/this-week-in-spring-december-29th-2020"&gt;released &lt;em&gt;This Week in Spring&lt;/em&gt;&lt;/a&gt; on this the last week of December, the last month of the year! And I shouldn&amp;rsquo;t have. I should &lt;em&gt;not&lt;/em&gt; have done that. Usually, you see, I turn the final installment of &lt;em&gt;This Week in Spring&lt;/em&gt; for a given year into the aptly named &lt;em&gt;This Year in Spring&lt;/em&gt;, a celebration of the big tentpole themes that have defined the year (well, from my perspective, anyway). Then I include the usual &lt;em&gt;This Week in Spring&lt;/em&gt; roundup inline. I forgot to do that first part, so I am publishing this as a separate post. Hey, &lt;em&gt;it&amp;rsquo;s tradition&lt;/em&gt;. &lt;/p&gt;
 &lt;p&gt;Ah, 2020. The year that just keeps on giving. This was the year of Tiger King. If you&amp;rsquo;d told me in 2019 that in 2020 I&amp;rsquo;d be glued to my couch watching the adventures of a Tiger trainer on Netflix, afraid of my delivery groceries, and that I&amp;rsquo;d be eager to get on a plane for the first time in ten months, I would&amp;rsquo;ve laughed off of my chair! &lt;/p&gt;
@@ -227,7 +681,7 @@ public class BootifulApplication {&#xD;
       <name>Josh Long</name>
     </author>
     <id>tag:spring.io,2020-12-29:4314</id>
-    <updated>2020-12-29T18:06:20Z</updated>
+    <updated>2020-12-29T17:06:20Z</updated>
     <content type="html">&lt;p&gt;Hi, Spring fans! Welcome to another installment of &lt;em&gt;This Week in Spring&lt;/em&gt;!&lt;/p&gt;
 &lt;p&gt;How are you? How&amp;rsquo;re things? I spent this morning on a fun two-hour panel hosted by the Barcelona JUG (who run the JBCN conference, among other things) talking about all sorts of things including GraalVM native images, new features in the Java language, cloud-native applications, and so much more. Thanks for having me! &lt;/p&gt;
 &lt;p&gt;I am so happy about this week&amp;rsquo;s roundup and we&amp;rsquo;ve got a lot to cover so let&amp;rsquo;s get to it!&lt;/p&gt;
@@ -257,7 +711,7 @@ public class BootifulApplication {&#xD;
       <name>Josh Long</name>
     </author>
     <id>tag:spring.io,2020-12-24:4313</id>
-    <updated>2020-12-24T11:18:54Z</updated>
+    <updated>2020-12-24T10:18:54Z</updated>
     <content type="html">&lt;p&gt;Hi, Spring fans! This week &lt;a href="http://twitter.com/starbuxman"&gt;Josh Long (@starbuxman)&lt;/a&gt; talks to Alibaba&amp;rsquo;s &lt;a href="http://twitter.com/SanHong_li"&gt;San-Hong Li (@SanHong_Li)&lt;/a&gt; on tuning OpenJDK for Alibaba-scale. &lt;/p&gt;
 &lt;p&gt;Merry Christmas / Happy Holidays to you! &lt;/p&gt;
 &lt;iframe title="Alibaba's San-Hong Li on tuning OpenJDK for Alibaba Scale" height="122" width="100%" style="border: none;" scrolling="no" data-name="pb-iframe-player" src="https://www.podbean.com/media/player/n9hns-f5d984?from=pb6admin&amp;download=1&amp;version=1&amp;auto=0&amp;share=1&amp;download=1&amp;rtl=0&amp;fonts=Helvetica&amp;skin=1&amp;pfauth=&amp;btn-skin=107"&gt;&lt;/iframe&gt;
@@ -271,7 +725,7 @@ public class BootifulApplication {&#xD;
       <name>Oleg Zhurakousky</name>
     </author>
     <id>tag:spring.io,2020-12-09:4289</id>
-    <updated>2020-12-23T16:11:00Z</updated>
+    <updated>2020-12-23T15:11:00Z</updated>
     <content type="html">&lt;h3&gt;&lt;a href="#introduction" class="anchor" name="introduction"&gt;&lt;/a&gt;Introduction&lt;/h3&gt;
 &lt;p&gt;We begin with a quick summary of the &lt;a href="https://spring.io/blog/2020/12/10/cloud-events-and-spring-part-1"&gt;previous post&lt;/a&gt;. &lt;/p&gt;
 &lt;ul&gt;
@@ -444,7 +898,7 @@ rsocketRequesterBuilder.tcp(&amp;quot;localhost&amp;quot;, 55555)&#xD;
       <name>Josh Long</name>
     </author>
     <id>tag:spring.io,2020-12-22:4312</id>
-    <updated>2020-12-22T23:04:17Z</updated>
+    <updated>2020-12-22T22:04:17Z</updated>
     <content type="html">&lt;p&gt;Hi, Spring fans! Welcome to another installment of &lt;em&gt;This Week in Spring!&lt;/em&gt; &lt;/p&gt;
 &lt;p&gt;It&amp;rsquo;s December 22nd, 2020, as I write this and I &lt;em&gt;can not&lt;/em&gt; believe we&amp;rsquo;re smack dab in the middle of the week and only have two shopping days until Christmas! I don&amp;rsquo;t know if it&amp;rsquo;s just that time of year and I&amp;rsquo;m flush with the normal amount of warm-n-fuzzies or if it&amp;rsquo;s just that, after a year like 2020, I&amp;rsquo;m very keen on savoring this precious reprieve. Either way, couldn&amp;rsquo;t be happier. I&amp;rsquo;ve got a cold! I&amp;rsquo;m sick and sneezing and my nose is running, but at least it&amp;rsquo;s not COVID-19, and at least I&amp;rsquo;ve got my family and my job, and - all things considered - I feel very, &lt;em&gt;very&lt;/em&gt;, &lt;em&gt;veery&lt;/em&gt; fortunate. &lt;/p&gt;
 &lt;p&gt;And yes, that&amp;rsquo;s right, I enumerated my health, my family, and my job because - after ten wonderful years (and counting) - I feel like the Spring team are family and I feel like working with you, dear community, is a true and exceptional privilege. I get so many wonderful messages from folks whenever I publish this weekly roundup or a blog or a video, and I appreciate that folks. I have always appreciated it, but especially this year when I, like so many in the world, am otherwise completely isolated from people. Thank you, and please let me wish you the warmest of greetings (if you don&amp;rsquo;t celebrate Christmas) and the happiest of holidays (if you do celebrate Christmas). &lt;/p&gt;
@@ -483,7 +937,7 @@ rsocketRequesterBuilder.tcp(&amp;quot;localhost&amp;quot;, 55555)&#xD;
       <name>Ryan Baxter</name>
     </author>
     <id>tag:spring.io,2020-12-22:4311</id>
-    <updated>2020-12-22T19:08:00Z</updated>
+    <updated>2020-12-22T18:08:00Z</updated>
     <content type="html">&lt;p&gt;On behalf of the community, I am pleased to announce that the GA release of the &lt;a href="https://cloud.spring.io"&gt;Spring Cloud 2020.0&lt;/a&gt; Release Train is available today. The release can be found in &lt;a href="https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dependencies/2020.0.0/"&gt;Maven Central&lt;/a&gt;. You can check out the 2020.0 &lt;a href="https://github.com/spring-projects/spring-cloud/wiki/Spring-Cloud-2020.0-Release-Notes"&gt;release notes for more information&lt;/a&gt;.&lt;/p&gt;&lt;h2&gt;&lt;a href="#notable-changes-in-the-2020-0-release-train" class="anchor" name="notable-changes-in-the-2020-0-release-train"&gt;&lt;/a&gt;Notable Changes in the 2020.0 Release Train&lt;/h2&gt;
 &lt;p&gt;This release requires Spring Boot 2.4.1. In general, this release was to fix bugs prior to release.&lt;/p&gt;
 &lt;p&gt;See &lt;a href="https://github.com/spring-cloud/spring-cloud-release/wiki/Spring-Cloud-2020.0-Release-Notes#known-issues"&gt;this page&lt;/a&gt; for a list of Known Issues.&lt;/p&gt;
@@ -681,7 +1135,7 @@ dependencies {&#xD;
       <name>Soby Chacko</name>
     </author>
     <id>tag:spring.io,2020-12-21:4309</id>
-    <updated>2020-12-21T18:53:59Z</updated>
+    <updated>2020-12-21T17:53:59Z</updated>
     <content type="html">&lt;div class="paragraph"&gt;
 &lt;p&gt;We are glad to announce the GA release of the newly redesigned Spring Cloud Stream applications - &lt;a href="https://github.com/spring-cloud/stream-applications/releases/tag/v2020.0.0"&gt;2020.0.0&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
@@ -889,8 +1343,8 @@ dependencies {&#xD;
     <author>
       <name>Josh Long</name>
     </author>
-    <id>tag:spring.io,2020-12-18:4308</id>
-    <updated>2020-12-18T00:52:25Z</updated>
+    <id>tag:spring.io,2020-12-17:4308</id>
+    <updated>2020-12-17T23:52:25Z</updated>
     <content type="html">&lt;p&gt;Hi, Spring fans! In this episode, &lt;a href="http://twitter.com/starbuxman"&gt;Josh Long (@starbuxman)&lt;/a&gt; talks to Cloud Foundry Developer Advocate &lt;a href="https://twitter.com/coder_blvck"&gt;Shedrack Akintayo (@coder_blvck) &lt;/a&gt;. &lt;/p&gt;
 &lt;p&gt;Also: Happy Holidays! &lt;/p&gt;
 &lt;iframe title="Cloud Foundry Developer Advocate Shedrack Akintayo" height="122" width="100%" style="border: none;" scrolling="no" data-name="pb-iframe-player" src="https://www.podbean.com/media/player/apa96-f5559d?from=pb6admin&amp;download=1&amp;version=1&amp;auto=0&amp;share=1&amp;download=1&amp;rtl=0&amp;fonts=Helvetica&amp;skin=1&amp;pfauth=&amp;btn-skin=107"&gt;&lt;/iframe&gt;
@@ -904,7 +1358,7 @@ dependencies {&#xD;
       <name>Martin Lippert</name>
     </author>
     <id>tag:spring.io,2020-12-16:4307</id>
-    <updated>2020-12-16T16:02:01Z</updated>
+    <updated>2020-12-16T15:02:01Z</updated>
     <content type="html">&lt;p&gt;Dear Spring Community,&lt;/p&gt;
 &lt;p&gt;I am happy to announce the 4.9.0 release of the Spring Tools 4 for Eclipse, Visual Studio Code, and Theia.&lt;/p&gt;&lt;h4&gt;&lt;a href="#major-changes-to-the-spring-tools-4-for-eclipse-distribution" class="anchor" name="major-changes-to-the-spring-tools-4-for-eclipse-distribution"&gt;&lt;/a&gt;major changes to the Spring Tools 4 for Eclipse distribution&lt;/h4&gt;
 &lt;ul&gt;
@@ -940,7 +1394,7 @@ dependencies {&#xD;
       <name>Josh Long</name>
     </author>
     <id>tag:spring.io,2020-12-16:4306</id>
-    <updated>2020-12-16T03:21:19Z</updated>
+    <updated>2020-12-16T02:21:19Z</updated>
     <content type="html">&lt;p&gt;Hi, Spring fans! Welcome to another installment of &lt;em&gt;This Week in Spring&lt;/em&gt;! Can you believe it&amp;rsquo;s already December 15th? Me either! Another few weeks and this soul annhilating year will be over with and we&amp;rsquo;ll be staring down 2021 filled with new hopes and possibilities! How are you? (Have you dipped into the eggnog yet?) I&amp;rsquo;m doing alright, thanks! I&amp;rsquo;ve been busy, as usual. &lt;/p&gt;
 &lt;p&gt;Most of that was fun stuff. But, some of that, I confess, was a mess of my own making. I spent Monday cleaning up a fire I&amp;rsquo;d set for myself. You see, I got a little sloppy with last week&amp;rsquo;s podcast episode. Last week, I was editing the audio for an episode with Spring Batch colead Mahmoud Ben Hassine and - in the middle of that - was pushing an interview I&amp;rsquo;d done with Dion Almaer out the door for publication that week. So, two episodes: one with Dion, one with Mahmoud. Dion was slated for last week. Mahmoud&amp;rsquo;s was slated for a future week. On top of that I&amp;rsquo;ve been toiling night and day it feels like on &lt;a href="http://github.com/bootiful-podcast"&gt;the production pipeline for my podcasts&lt;/a&gt;, living that &lt;code&gt;kubectl apply -k $WORKING_DIR&lt;/code&gt; life, and I was tired of some of the issues still lingering but figured I could, basically trust the system. So I published the episode with Dion. I got everything right, &lt;em&gt;except&lt;/em&gt; the interview was with Mahmoud. Not Dion. So it said Dion. But I&amp;rsquo;d accidentally sent out the wrong episode. Awkward. Worse, after I published that episode, figuring I had a week to make a mess before I&amp;rsquo;d next have to publish an episode, I started making a mess of the codebase. I broke stuff. Would&amp;rsquo;ve been no big deal. I would&amp;rsquo;ve sorted it out! But yesterday, Monday, I realize people are complaining that I&amp;rsquo;d bungled the audio: published the preface and description for Dion but published the audio interview with Mahmoud. So I raced to fix it, except production was down! So I spent Monday dodging between meetings and calls and trying to get the system restored. I finally got the system on its feet again late last night - both episodes with the correct titling and audio and links and photos went out and it was good. Thank you so much for your patience, community. I have egg on my face. &lt;/p&gt;
 &lt;p&gt;Anyway, everything&amp;rsquo;s fine now. I&amp;rsquo;m not gonna touch a thing until the new episode, due later this week, rolls out! And, bonus, you get not one, but &lt;em&gt;two&lt;/em&gt; episodes this week: I published both episodes last night. So, in total, you&amp;rsquo;ll get three episodes in a seven-day period, not one. Huzzah. &lt;/p&gt;
@@ -977,1730 +1431,6 @@ dependencies {&#xD;
   &lt;li&gt;&lt;a href="https://spring.io/blog/2020/12/15/testing-spring-cloud-stream-applications-part-2"&gt;Testing Spring Cloud Stream Applications - Part 2&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href="https://www.youtube.com/watch?app=desktop&amp;v=rWNYPRxihno"&gt;vSphere With Tanzu DDS - Ep 5 - Exploring a Tanzu Kubernetes Cluster - YouTube&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>Testing Spring Cloud Stream Applications - Part 2</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/12/15/testing-spring-cloud-stream-applications-part-2" />
-    <category term="engineering" label="Engineering" />
-    <author>
-      <name>David Turanski</name>
-    </author>
-    <id>tag:spring.io,2020-12-11:4301</id>
-    <updated>2020-12-15T19:05:52Z</updated>
-    <content type="html">&lt;div class="paragraph"&gt;
-&lt;p&gt;This is Part 2 of Testing Stream Applications. In &lt;a href="https://spring.io/blog/2020/12/15/testing-spring-cloud-stream-applications-part-1"&gt;Part 1&lt;/a&gt; we implemented and tested the core function needed for our sample &lt;a href="https://github.com/spring-cloud/spring-cloud-stream-samples/tree/master/function-based-stream-app-samples/couchbase-stream-applications"&gt;couchbase-sink&lt;/a&gt; application. The tests at the function level covered expected success and error scenarios and relied on &lt;a href="https://www.testcontainers.org/"&gt;Testcontainers&lt;/a&gt; to provision a Couchbase cluster. This post assumes you have read Part 1 and continues where it left off.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="couchbase-sink"&gt;&lt;a class="anchor" href="#couchbase-sink"&gt;&lt;/a&gt;Couchbase Sink&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;In Part 1 we verified that the function we wrote for upserting data into Couchbase works as expected.  We can now use the function,  exposed as a &lt;code&gt;java.util.Consumer&lt;/code&gt;,  to implement a sink to use in a data pipeline built with Spring Cloud Stream. Like most of the pre-packaged stream applications, we simply embed the function configuration into a Spring Boot application. Unlike the pre-packaged applications which generate identical applications configured for Kafka and Rabbit, we will roll our own to use the Kafka binder.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Here&amp;#8217;s the main application class:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@SpringBootApplication
-@Import(CouchbaseConsumerConfiguration.class)
-public class CouchbaseSinkApplication {
-	public static void main(String... args) {
-		new SpringApplication(CouchbaseSinkApplication.class).run(args);
-	}
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;We also need to add some dependencies: The function, Spring Cloud Stream, and the Kafka binder.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="xml"&gt;&amp;lt;dependency&amp;gt;
-        &amp;lt;groupId&amp;gt;io.spring.example&amp;lt;/groupId&amp;gt;
-        &amp;lt;artifactId&amp;gt;couchbase-consumer&amp;lt;/artifactId&amp;gt;
-    &amp;lt;/dependency&amp;gt;
-    &amp;lt;dependency&amp;gt;
-        &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-        &amp;lt;artifactId&amp;gt;spring-cloud-stream&amp;lt;/artifactId&amp;gt;
-    &amp;lt;/dependency&amp;gt;
-    &amp;lt;dependency&amp;gt;
-        &amp;lt;groupId&amp;gt;org.springframework.boot&amp;lt;/groupId&amp;gt;
-        &amp;lt;artifactId&amp;gt;spring-boot-starter-actuator&amp;lt;/artifactId&amp;gt;
-    &amp;lt;/dependency&amp;gt;
-    &amp;lt;dependency&amp;gt;
-        &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-        &amp;lt;artifactId&amp;gt;spring-cloud-stream-binder-kafka&amp;lt;/artifactId&amp;gt;
-    &amp;lt;/dependency&amp;gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;And, since we are rolling our own, we can set some required properties in &lt;code&gt;application.properties&lt;/code&gt;. Since &lt;code&gt;couchbase-consumer&lt;/code&gt; includes 2 candidate functions, we need to tell Spring Cloud Stream to use the &lt;code&gt;Consumer&lt;/code&gt; wrapper. Also, we alias the default consumer input binding name &lt;code&gt;couchbaseConsumer-in-0&lt;/code&gt; to &lt;code&gt;input&lt;/code&gt; so the sink to work with Spring Cloud Data Flow.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code&gt;spring.cloud.function.definition=couchbaseConsumer
-spring.cloud.stream.function.bindings.couchbaseConsumer-in-0=input&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;That&amp;#8217;s literally it! At least we think so. How can we be sure? The kind of tests we need, not surprisingly, are similar to the function level tests. But we don&amp;#8217;t really need to run every test case, since we already know how the function will behave within a boot application with various property settings. But we haven&amp;#8217;t actually invoked the function via Spring Cloud Stream yet. Also, it doesn&amp;#8217;t cost so much since we can reuse much of the test code we wrote for the function. So we only need a "smoke test" to run the happy path to make sure we didn&amp;#8217;t leave out some required dependency, or that there are typos in our configuration properties, are that there are no gotchas now, or whenever we upgrade some dependency down the road. Here we configure a Couchbase TestContainer, as we did to test the function. But instead of invoking the function directly, we will let Spring Cloud Stream do it when we send a message to an input destination configured for the sink. For this test, we use the &lt;code&gt;TestChannelBinder&lt;/code&gt;, an in-memory binder provided by the following dependency:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="xml"&gt;&amp;lt;dependency&amp;gt;
-        &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-        &amp;lt;artifactId&amp;gt;spring-cloud-stream&amp;lt;/artifactId&amp;gt;
-        &amp;lt;type&amp;gt;test-jar&amp;lt;/type&amp;gt;
-        &amp;lt;classifier&amp;gt;test-binder&amp;lt;/classifier&amp;gt;
-        &amp;lt;scope&amp;gt;test&amp;lt;/scope&amp;gt;
-&amp;lt;/dependency&amp;gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;We use &lt;code&gt;TestChannelBinderConfiguration.getCompleteConfiguration(CouchbaseSinkApplication.class)&lt;/code&gt; to add the TestChannelBinder to our application context for our test.
-This gives us an &lt;code&gt;InputDestination&lt;/code&gt; bean to send messages to the sink. As in the function test, we use the &lt;code&gt;Cluster&lt;/code&gt; object to verify the data is present in Couchbase.
-Since the &lt;em&gt;upsert&lt;/em&gt; operation is asynchronous, we need to poll the data store for some time until the data is there.
-The &lt;a href="https://github.com/awaitility/awaitility"&gt;awaitility&lt;/a&gt; library is great for testing asynchronous systems.
-In this case, we&amp;#8217;ll give it 10 seconds before we assume the operation has failed.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@Testcontainers
-public class CouchbaseSinkApplicationTests {
-  @Container
-  static CouchbaseContainer container =
-          new CouchbaseContainer("couchbase/server:6.6.0")
-             .withBucket(new BucketDefinition("test"));
-
-  static Map&amp;lt;String, Object&amp;gt; connectProperties = new HashMap&amp;lt;&amp;gt;();
-
-  @BeforeAll
-  static void initialize() {
-    connectProperties.put("spring.couchbase.connection-string", container.getConnectionString());
-    connectProperties.put("spring.couchbase.username", container.getUsername());
-    connectProperties.put("spring.couchbase.password", container.getPassword());
-  }
-
-  @Test
-  void test() {
-    try (ConfigurableApplicationContext context = new SpringApplicationBuilder(
-      TestChannelBinderConfiguration
-        .getCompleteConfiguration(CouchbaseSinkApplication.class))
-	.web(WebApplicationType.NONE)
-        .properties(connectProperties)
-        .run("--couchbase.consumer.bucketExpression='test'",
-               "--couchbase.consumer.keyExpression=payload.email")) {
-        InputDestination inputDestination = context.getBean(InputDestination.class);
-        Cluster cluster = context.getBean(Cluster.class);
-        inputDestination.send(new GenericMessage&amp;lt;&amp;gt;(
-           new User("Bart Simpson", "bart@simpsons.com")));
-
-       await().atMost(Duration.ofSeconds(10)).untilAsserted(() -&amp;gt; {
-          User user = cluster.bucket("test")
-                .defaultCollection().get("bart@simpsons.com")
-                .contentAs(User.class);
-         assertThat(user).isNotNull();
-         assertThat(user.getName()).isEqualTo("Bart Simpson");
-       });
-     }
-  }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect2"&gt;
-&lt;h3 id="integration-testing"&gt;&lt;a class="anchor" href="#integration-testing"&gt;&lt;/a&gt;Integration Testing&lt;/h3&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;At this point, we have good test coverage between the application and function tests. But we have not yet verified that the application binary that we want to build and deploy works in a true integration environment.
-Since the sink application uses the Kafka binder, the integration test environment requires a Kafka broker, a Couchbase cluster, and our deployed application.
-We can deploy and run the Spring Boot executable jar directly. More often these days, it is a container image.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Generally, it is not too risky to assume that the sink built as a container will work, but we at least want to make sure that we know how to configure the application to use an external Kafka broker and Couchbase cluster, and that we built our image correctly.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;For the pre-built Spring Cloud Stream applications, we have further reason to test the built artifacts. The core applications do not provide any additional code. Instead, we use the &lt;a href="https://github.com/spring-cloud/spring-cloud-dataflow-apps-plugin/tree/master/spring-cloud-dataflow-apps-generator-plugin"&gt;spring-cloud-dataflow-apps-generator-plugin&lt;/a&gt; to automatically generate identical applications that can run with either Kafka or  RabbitMQ. The plugin requires Maven configuration which we manually add for each application. Just because our function works with the TestChannelBinder, we can&amp;#8217;t be sure that the built artifact works until we run it. Misconfiguring the apps generator plugin, changes to the plugin itself, or the base image, or any dependencies, may break something. Testcontainers and Junit 5 give us a relatively straightforward way to integration test the pre-built applications with both Kafka and RabbitMQ. To help us write integration tests, we provide additional support in &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/applications/stream-applications-core/stream-applications-test-support#stream-application-integration-testing"&gt;stream-applications-test-suport&lt;/a&gt;. This library is available to the community by adding the dependency:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="xml"&gt;&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud.stream.app&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;stream-applications-test-support&amp;lt;/artifactId&amp;gt;
-    &amp;lt;scope&amp;gt;test&amp;lt;/scope&amp;gt;
-&amp;lt;/dependency&amp;gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The sample includes an integration test to test the built image, in this case built with the &lt;a href="https://docs.spring.io/spring-boot/docs/current/maven-plugin/reference/htmlsingle/#goals-build-image"&gt;Spring Boot Maven plugin&lt;/a&gt;.
-Like the application test, we will just plug in Kafka, Couchbase, and our image, turn on the power, and make sure we don&amp;#8217;t see or smell any smoke.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The complete integration test is:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@KafkaStreamAppTest
-@Tag("integration")
-public class CouchbaseSinkIntegrationTests {
-
-  static StreamAppContainer sink =
-        new KafkaStreamAppContainer("couchbase-sink:0.0.1-SNAPSHOT");
-
-  @Container
-  static CouchbaseContainer container =
-      new CouchbaseContainer("couchbase/server:6.6.0")
-          .withNetwork(KafkaConfig.kafka.getNetwork())
-          .withNetworkAliases("couchbase-server")
-          .withBucket(new BucketDefinition("test"));
-
-  static Cluster cluster;
-
-  @Autowired
-  TestTopicSender testTopicSender;
-
-  @BeforeAll
-  static void initialize() {
-    await().until(() -&amp;gt; container.isRunning());
-    String connectionString = "couchbase://couchbase-server";
-    sink.waitingFor(Wait.forLogMessage(".*Started CouchbaseSink.*", 1))
-          .withLogConsumer(appLog("couchbase-sink"))
-          .withCommand(
-            "--spring.couchbase.connection-string=couchbase://couchbase-server",
-            "--spring.couchbase.username=" + container.getUsername(),
-            "--spring.couchbase.password=" + container.getPassword(),
-            "--couchbase.consumer.bucket-expression='test'",
-            "--couchbase.consumer.key-expression=payload.email")
-          .start();
-
-    cluster = Cluster.connect(container.getConnectionString(),
-    ClusterOptions.clusterOptions(container.getUsername(), container.getPassword()));
-  }
-  @AfterAll
-  static void stop() {
-    sink.stop();
-  }
-
-  @Test
-  void test() throws JsonProcessingException {
-    ObjectMapper objectMapper = new ObjectMapper();
-    testTopicSender.send(sink.getInputDestination(),
-    objectMapper.writeValueAsString(
-       new User("Bart Simpson", "bart@simpsons.com")));
-
-    await().atMost(Duration.ofSeconds(10)).untilAsserted(() -&amp;gt; {
-       ExistsResult result = cluster.bucket("test")
-         .defaultCollection().exists("bart@simpsons.com");
-      assertThat(result.exists()).isTrue();
-    });
-
-    User user = objectMapper.readValue(
-    cluster.bucket("test").defaultCollection().get("bart@simpsons.com")
-   .contentAs(String.class), User.class);
-
-    assertThat(user.getName()).isEqualTo("Bart Simpson");
-  }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;To unpack this, let&amp;#8217;s start with the &lt;code&gt;@KafkaStreamAppTest&lt;/code&gt; class annotation. This starts a Kafka test container, and configures Kafka components, using Spring for Apache Kafka, that we can use to produce and consume messages with Kafka. The Kafka container is started in a static initializer, which makes it a true singleton, allowing every test that runs in a JVM to use it. In addition to Spring configuration, the annotation includes &lt;code&gt;@TestContainers&lt;/code&gt; as a meta annotation. For this test, we do not let Testcontainers manage the lifecycle of the &lt;code&gt;StreamAppContainer&lt;/code&gt;, since we want to start it after we know the Couchbase cluster is running. The Couchbase container has some additional configuration. For convenience, it shares a virtual network with the &lt;code&gt;StreamAppContainer&lt;/code&gt; (automatically configured to use the same network as the Kafka container). This allows the Stream App Container to connect to the Couchbase server using an alias of our choosing, &lt;code&gt;couchbase-server&lt;/code&gt; (remember, &lt;code&gt;localhost&lt;/code&gt; inside a container refers to its own IP address).&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@Container
-static CouchbaseContainer container = new CouchbaseContainer("couchbase/server:6.6.0")
-        .withNetwork(KafkaConfig.kafka.getNetwork())
-        .withNetworkAliases("couchbase-server")
-        .withBucket(new BucketDefinition("test"));&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The StreamAppContainer is a &lt;a href="https://www.testcontainers.org/features/creating_container/"&gt;GenericContainer&lt;/a&gt; with the required configuration to connect to Kafka and use the Kafka binder.
-The Spring Configuration also sets up a listener on a known topic to consume any output from the container. This is not used in this case, since we only have an input for the sink.
-The input destination is randomly generated and accessed via &lt;code&gt;getInputDestination()&lt;/code&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;static StreamAppContainer sink = new KafkaStreamAppContainer("couchbase-sink:0.0.1-SNAPSHOT");
-...
-
-@BeforeAll
-static void initialize() {
-    await().until(() -&amp;gt; container.isRunning());
-    String connectionString = "couchbase://couchbase-server";
-    sink.waitingFor(Wait.forLogMessage(".*Started CouchbaseSink.*", 1))
-            .withLogConsumer(appLog("couchbase-sink"))
-            .withCommand(
-                    "--spring.couchbase.connection-string=couchbase://couchbase-server",
-                    "--spring.couchbase.username=" + container.getUsername(),
-                    "--spring.couchbase.password=" + container.getPassword(),
-                    "--couchbase.consumer.bucket-expression='test'",
-                    "--couchbase.consumer.key-expression=payload.email")
-            .start();&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Once the Couchbase container is running, we will start the sink. We wait for the standard Spring Boot start up message to confirm the sink has started.
-We also add a LogConsumer to output all the log messages in case there is an error. Note the connection string is simply using the Couchbase container&amp;#8217;s network alias.
-This is possible because the sink and Couchbase are using the same virtual network.
-Here, we pass all properties on the command line, but we could just as well set them as environment variables, via &lt;code&gt;withEnvironment()&lt;/code&gt;.
-Since we control the sink lifecycle, we need to stop it after all the tests are complete.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The test uses an autowired &lt;code&gt;TestTopicSender&lt;/code&gt;. This is a middleware agnostic interface, backed by KafkaTemplate in this case.
-This interface is useful for run the same test cases for Kafka and Rabbit. Here, we could just as well autowire the &lt;code&gt;KafkaTemplate&lt;/code&gt;.
-At the time of this writing, only the String serdes are configured for the Kafka template, so we use an &lt;code&gt;ObjectMapper&lt;/code&gt; to work with Strings.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@Test
-  void test() throws JsonProcessingException {
-    ObjectMapper objectMapper = new ObjectMapper();
-    testTopicSender.send(sink.getInputDestination(),
-    objectMapper.writeValueAsString(
-       new User("Bart Simpson", "bart@simpsons.com")));
-
-    await().atMost(Duration.ofSeconds(10)).untilAsserted(() -&amp;gt; {
-       ExistsResult result = cluster.bucket("test")
-         .defaultCollection().exists("bart@simpsons.com");
-      assertThat(result.exists()).isTrue();
-    });
-
-    User user = objectMapper.readValue(
-    cluster.bucket("test").defaultCollection().get("bart@simpsons.com")
-   .contentAs(String.class), User.class);
-
-    assertThat(user.getName()).isEqualTo("Bart Simpson");
-  }&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Since this tests requires the sink image, we use the Junit 5 &lt;code&gt;@Tag&lt;/code&gt; annotation to mark it as an integration test.
-We also configured Maven to exclude this from the normal build, and only build the image and run it when the &lt;em&gt;integration&lt;/em&gt; profile is set.
-The complete source code is &lt;a href="https://github.com/spring-cloud/spring-cloud-stream-samples/tree/master/function-based-stream-app-samples/couchbase-stream-applications"&gt;here&lt;/a&gt; and requires Java 8+ and Docker.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="conclusion"&gt;&lt;a class="anchor" href="#conclusion"&gt;&lt;/a&gt;Conclusion&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;In this post we explored strategies for testing Spring Cloud Stream applications that integrate with external services, such as Couchbase. The majority of the testing, described in Part 1, was done at the function level. The application and integration tests are really smoke tests to verify that we have everything built, configured and integrated correctly. We also showed how to use TestContainers for testing Stream Applications.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="stay-tuned"&gt;&lt;a class="anchor" href="#stay-tuned"&gt;&lt;/a&gt;Stay tuned&amp;#8230;&amp;#8203;&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Thanks for coming! We hope you found this content helpful. We have a couple more posts until we conclude this series.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>Testing Spring Cloud Stream Applications - Part 1</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/12/15/testing-spring-cloud-stream-applications-part-1" />
-    <category term="engineering" label="Engineering" />
-    <author>
-      <name>David Turanski</name>
-    </author>
-    <id>tag:spring.io,2020-12-09:4292</id>
-    <updated>2020-12-15T19:04:00Z</updated>
-    <content type="html">&lt;div class="paragraph"&gt;
-&lt;p&gt;This post is part  of a blog series that explores the newly redesigned Spring Cloud Stream applications based on Java Functions.
-This episode, presented in two parts, explores strategies for testing functions used to implement stream applications.
-We will pay special attention to functions that integrate with external resources, which presents additional testing challenges. Such is the case with most of the &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/applications"&gt;pre-packaged source and sink applications&lt;/a&gt;.  To illustrate this, we will walk through a sample &lt;a href="https://github.com/spring-cloud/spring-cloud-stream-samples/tree/master/function-based-stream-app-samples/couchbase-stream-applications"&gt;couchbase-sink&lt;/a&gt; application.  Here in Part 1, we will focus on the core function on which the sink is based. In &lt;a href="https://spring.io/blog/2020/12/15/testing-spring-cloud-stream-applications-part-2"&gt;Part 2&lt;/a&gt;, we will look at writing tests for for the application.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Here are all the previous entries in this blog series.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="ulist"&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/07/13/introducing-java-functions-for-spring-cloud-stream-applications-part-0"&gt;Introducing Function Based Streaming Applications&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/07/20/introducing-java-functions-for-spring-cloud-stream-applications-part-1"&gt;Function Composition with Streaming Applications&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/07/27/creating-a-supplier-function-and-generating-spring-cloud-stream-source"&gt;How to Build a Supplier and Source Application&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/08/03/creating-a-function-for-consuming-data-and-generating-spring-cloud-stream-sink-applications"&gt;How to Build a Consumer and Sink Application&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/08/10/case-study-build-and-run-a-streaming-application-using-an-http-source-and-a-jdbc-sink"&gt;Build and Run a Simple Stream Application&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/08/17/case-study-http-request-function-and-processor"&gt;Case Study: HTTP Request Function and Processor&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/08/25/case-study-reading-from-a-file-and-writing-to-mongodb"&gt;Case Study: File Source and MongoDB Sink&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/09/10/case-study-relational-database-source-and-file-sink"&gt;Case Study: Relational Database Source and File Sink&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/09/29/case-study-remote-file-ingest-with-spring-cloud-data-flow"&gt;Case Study: Remote File Ingest with Spring Cloud Data Flow&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/10/26/case-study-aggregator-function-and-processor"&gt;Case Study: Aggregator Function and Processor&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/12/14/case-study-change-data-capture-cdc-analysis-with-cdc-debezium-source-and-analytics-sink-in-real-time"&gt;Case Study: Change Data Capture (CDC) Analysis with CDC Debezium source and Analytics sink in Real-Time&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="testing-considerations"&gt;&lt;a class="anchor" href="#testing-considerations"&gt;&lt;/a&gt;Testing Considerations&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="sect2"&gt;
-&lt;h3 id="functions-and-applications"&gt;&lt;a class="anchor" href="#functions-and-applications"&gt;&lt;/a&gt;Functions and Applications&lt;/h3&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;For function-based stream applications, the core functionality is exposed as a function. The core functions for the pre-built  &lt;a href="https://spring.io/projects/spring-cloud-stream"&gt;Spring Cloud Stream&lt;/a&gt; applications are packaged as separate components to allow them  to be used by any application, independent of Spring Cloud Stream. Spring Cloud Stream natively supports Java functions and will bind to any bean that implements one of the core &lt;code&gt;java.util.function&lt;/code&gt; types: &lt;code&gt;Consumer&lt;/code&gt;, &lt;code&gt;Supplier&lt;/code&gt;, or &lt;code&gt;Function&lt;/code&gt;. Viewed as a separate component, the function need not depend on Spring or anything else. If you register any function as a bean in any application that includes a Spring Cloud Stream binder as a dependency, Spring Cloud Stream will bind it to a configured message destination.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;In a data pipeline, a stream of data originates from a Source and flows into a Sink, with zero or more processing steps in between. In practice, the Source acts as a Supplier of data from some external resource, such as a data store, any service supporting a standard protocol, or a message broker.  The Sink acts as a consumer of data for some other external resource. Since Spring provides first class support for most commonly used external resources, it should come as no suprise that most of the pre-packaged sources and sinks rely on some combination of Spring Integration, Spring Data, and Spring Boot. Additionally, they are designed to be configured for many environments, domains and use cases, via &lt;code&gt;@ConfigurationProperties&lt;/code&gt;.  Although these functions themselves are not Spring Boot Applications, they must be imported into a Spring Boot application to run.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Since all the core functionality is implemented by the function, we want to focus most of our testing efforts at this level.  To ensure that our function behaves correctly under all expected success and error conditions, we need to write tests to cover these scenarios. These tests need to create an auto-configured application context and provision or mock required external resource.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;If the function is configurable via &lt;code&gt;@ConfigurationProperties&lt;/code&gt;, then we can treat each properties combination as a different test case. Some properties are required, and some are optional. Since using the function requires the end user to provide these properties, expected scenarios include both valid and invalid configurations, such as required properties missing, invalid values, or an invalid combination (mutually exclusive properties).&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect2"&gt;
-&lt;h3 id="unit-vs-integration-tests"&gt;&lt;a class="anchor" href="#unit-vs-integration-tests"&gt;&lt;/a&gt;Unit vs Integration Tests&lt;/h3&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;There are no widely accepted definitions that will help us here. Especially with sources and sinks, in which the core functionality &lt;em&gt;is&lt;/em&gt; integration, it&amp;#8217;s hard to know where to draw the line between unit and integration tests. On one hand, a Java function is a &lt;em&gt;unit&lt;/em&gt;, in that it is a single interface. However, if its sole purpose is to integrate with a remote system, it is difficult, if not impossible, to test in isolation. However, I think we can agree on some general characteristics:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Unit tests:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="ulist"&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;Run automatically as part of a build in any developer or CI environment without any external configuration&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Are reasonably fast&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Are written by the developer and run frequently&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Integration tests:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="ulist"&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;Run automatically in an integration environment&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Require the component under test, along with external dependencies to be deployed&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;May be slow&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Are run less often&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Given this definition of unit tests, Part 1 is about unit testing functions.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="test-containers"&gt;&lt;a class="anchor" href="#test-containers"&gt;&lt;/a&gt;Test Containers&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;&lt;a href="https://www.testcontainers.org/"&gt;Testcontainers&lt;/a&gt; is a recent and popular Java library that lets you programmatically spin up and throw away any external resource that can run in a Docker container. It includes dozens of out-of-the-box modules for commonly used resources. You can also use the library to create custom containers programmatically, from Dockerfiles, or docker-compose yaml. While intended primarily for integration tests, it is extremely useful for writing unit tests when mocking takes considerably more effort. Of course we have to sacrifice some speed and relax the "no external dependencies" rule to allow for a Docker daemon installed and running on the host. Since many development and CI environments today are already required to use and build images, this is a reasonable assumption.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="example"&gt;&lt;a class="anchor" href="#example"&gt;&lt;/a&gt;Example&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="sect2"&gt;
-&lt;h3 id="couchbase-consumer-function"&gt;&lt;a class="anchor" href="#couchbase-consumer-function"&gt;&lt;/a&gt;Couchbase Consumer Function&lt;/h3&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;To illustrate, we will write a Couchbase consumer function to add some data to a Couchbase key-value store using the &lt;em&gt;upsert&lt;/em&gt; operation.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;For efficiency, we will implement the function using the Couchbase Java client&amp;#8217;s reactive API. This API returns a publisher of &lt;a href="https://docs.couchbase.com/sdk-api/couchbase-java-client/com/couchbase/client/java/kv/MutationResult.html"&gt;MutationResult&lt;/a&gt;, so our core interface is
-&lt;code&gt;Function&amp;lt;Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt;, Flux&amp;lt;MutationResult&amp;gt;&amp;gt;&lt;/code&gt;.  This function will be configured with Spring, and can be embedded into any Spring Boot Application. To support a &lt;code&gt;couchbase-sink&lt;/code&gt;, we will wrap the function in a &lt;code&gt;Consumer&amp;lt;Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The &lt;code&gt;upsert&lt;/code&gt; operation inserts or updates data in a &lt;a href="https://docs.couchbase.com/server/current/learn/buckets-memory-and-storage/buckets.html"&gt;Bucket&lt;/a&gt;,
-which is the primary data store abstraction for Couchbase. In our case, a &lt;code&gt;ReactiveBucket&lt;/code&gt;.  A bucket is specified by name and must exist in the Couchbase cluster beforehand. Starting with v6.5, Couchbase supports &lt;a href="https://docs.couchbase.com/server/current/developer-preview/collections/collections-overview.html"&gt;Collections&lt;/a&gt;. So the bucket may be partitioned into many collections, but this is an optional feature that must be enabled in the cluster. The &lt;code&gt;upsert&lt;/code&gt; method targets a named collection, or the &lt;em&gt;defaultCollection&lt;/em&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;We pass the key and value to our function in a Spring Message, consisting of a payload and headers. The payload can be any object, and the headers are essentially a Map. To make this function generic, we can use a &lt;a href="https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#expressions"&gt;SpEL expression&lt;/a&gt; to specify the key. The key expression is evaluated against the Message, and may reference fields or methods in the payload, or a header. The value is the payload.  The function also requires the user to specify a bucket and collection name. To maximize flexibility, let&amp;#8217;s double down on SpEL and make everything an expression. Now, if we want, the function can extract all its input values from the message at runtime to upsert any data in any collection in any bucket. In the simplest case, the bucket and collection can be defined statically.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;So the function needs some configuration properties:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@ConfigurationProperties("couchbase.consumer")
-@Validated
-public class CouchbaseConsumerProperties {
-    private static final String DEFAULT_VALUE_EXPRESSION = "payload";
-    private final SpelExpressionParser parser = new SpelExpressionParser();
-
-   /**
-    * A SpEL expression to specify the bucket.
-    */
-    private Expression bucketExpression;
-
-   /**
-      * A SpEL expression to specify the key.
-     */
-    private Expression keyExpression;
-
-  /**
-    * A SpEL expression to specify the collection.
-    */
-    private Expression collectionExpression;
-
-  /**
-    * A SpEL expression to specify the value (default is payload).
-    */
-    private Expression valueExpression =
-                parser.parseExpression(DEFAULT_VALUE_EXPRESSION);
-    ...&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="admonitionblock tip"&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class="icon"&gt;
-&lt;div class="title"&gt;Tip&lt;/div&gt;
-&lt;/td&gt;
-&lt;td class="content"&gt;
-To statically confiugure some of these values, use a literal expression, enclosing the value in single quotes, e.g. &lt;code&gt;couchbase.consumer.bucketExpression='mybucket'&lt;/code&gt;. Normally, you would extract the key and value from the message contents.
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;We configure the reactive Function and corresponding Consumer with Spring:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@Configuration
-@EnableConfigurationProperties(CouchbaseConsumerProperties.class)
-public class CouchbaseConsumerConfiguration {
-
-    private static Logger logger =
-            LoggerFactory.getLogger(CouchbaseConsumerConfiguration.class);
-
-    @Bean
-    public Consumer&amp;lt;Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt;&amp;gt; couchbaseConsumer(Function&amp;lt;Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt;,
-                Flux&amp;lt;MutationResult&amp;gt;&amp;gt; couchbaseConsumerFunction) {
-        return message -&amp;gt; couchbaseConsumerFunction.apply(message)
-               .subscribe(mutationResult -&amp;gt; logger.debug("Processed " + message));
-    }
-
-    @Bean
-    public Function&amp;lt;Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt;, Flux&amp;lt;MutationResult&amp;gt;&amp;gt; couchbaseConsumerFunction(
-          Cluster cluster, CouchbaseConsumerProperties consumerProperties) {
-        return flux -&amp;gt; flux.flatMap(message -&amp;gt; {
-            logger.debug("Processing message " + message);
-             String bucketName = bucket(message,
-                          consumerProperties.getBucketExpression());
-            String key = key(message, consumerProperties.getKeyExpression());
-            ReactiveBucket bucket = cluster.bucket(bucketName).reactive();
-             ReactiveCollection collection = collection(message,
-                            consumerProperties.getCollectionExpression())
-				  .map(name -&amp;gt; bucket.collection(name))
-                                  .orElse(bucket.defaultCollection());
-            return collection.upsert(key,
-                              value(message, consumerProperties.getValueExpression()));
-        });
-    }
-
-    private String bucket(Message&amp;lt;?&amp;gt; message, Expression expression) {
-        return expression.getValue(message, String.class);
-    }
-
-    private String key(Message&amp;lt;?&amp;gt; message, Expression expression) {
-        return expression.getValue(message, String.class);
-    }
-
-    private Object value(Message&amp;lt;?&amp;gt; message, Expression expression) {
-        return expression.getValue(message);
-    }
-
-    private Optional&amp;lt;String&amp;gt; collection(Message&amp;lt;?&amp;gt; message,
-                                             @Nullable Expression expression) {
-        return expression == null ? Optional.empty() :
-                Optional.of(expression.getValue(message, String.class));
-    }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;These two classes are all we need to implement the function. The required dependencies are:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="xml"&gt;&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;com.couchbase.client&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;java-client&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
-&amp;lt;!-- Enable configuration properties metadata to be added to the jar --&amp;gt;
-&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.boot&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-boot-configuration-processor&amp;lt;/artifactId&amp;gt;
-    &amp;lt;optional&amp;gt;true&amp;lt;/optional&amp;gt;
-&amp;lt;/dependency&amp;gt;
-&amp;lt;!-- This provides a Spring Converter to convert Strings to Expression, required for CouchbaseConsumerProperties as implemented --&amp;gt;
-&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud.fn&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;config-common&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;As mentioned earlier, this is not a Spring Boot application, but a component that must be embedded in a Spring Boot application to run.
-Spring Boot binds the &lt;code&gt;@ConfigurationPropeties&lt;/code&gt; and also provides &lt;a href="https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/autoconfigure/couchbase/CouchbaseAutoConfiguration.html"&gt;CouchbaseAutoConfiguration&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="admonitionblock note"&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class="icon"&gt;
-&lt;div class="title"&gt;Note&lt;/div&gt;
-&lt;/td&gt;
-&lt;td class="content"&gt;
-This example does not use &lt;a href="https://spring.io/projects/spring-data-couchbase"&gt;spring-data-couchbase&lt;/a&gt; since it is intended for using Spring Data Repositories and automatically mapping specific domain objects. Since our function is intended to handle any payload type, we use boot to autoconfigure the Cluster along with the Couchbase Java SDK.
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;So how did we end up with a function that actually works? The sample code above is the result of test driven development, refined over several iterations. Since the function depends on the Couchbase SDK &lt;code&gt;Cluster&lt;/code&gt; object which does all the work, we need to create a Cluster instance before we can do anything. The Cluster needs to connect to a Couchbase server.  If we happen to have a Couchbase cluster already running on our network, with a bucket we can use for testing, then we might use that initially. But even if we assume Couchbase is accessable from our development and CI environment,  what happens if we can&amp;#8217;t connect to Couchbase for some reason - the cluster is down, credentials expired, permissions changed, or some other reason?  Do we want to let that break our CI/CD pipeline or stop our progress?&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Fortunately, we can use the Testcontainers &lt;a href="https://www.testcontainers.org/modules/databases/couchbase/"&gt;couchbase module&lt;/a&gt; to spin up our own Couchbase environment.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="admonitionblock note"&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class="icon"&gt;
-&lt;div class="title"&gt;Note&lt;/div&gt;
-&lt;/td&gt;
-&lt;td class="content"&gt;
-Full disclosure: I also tried &lt;a href="https://github.com/couchbase/CouchbaseMock"&gt;CouchbaseMock&lt;/a&gt; but it appears to be incompatible with the current &lt;a href="https://github.com/couchbase/couchbase-java-client"&gt;couchbase Java client&lt;/a&gt;.
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The required test libraries for Junit 5, are:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="xml"&gt;&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.boot&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-boot-starter-test&amp;lt;/artifactId&amp;gt;
-    &amp;lt;scope&amp;gt;test&amp;lt;/scope&amp;gt;
-&amp;lt;/dependency&amp;gt;
-&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;io.projectreactor&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;reactor-test&amp;lt;/artifactId&amp;gt;
-    &amp;lt;scope&amp;gt;test&amp;lt;/scope&amp;gt;
-&amp;lt;/dependency&amp;gt;
-&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.testcontainers&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;couchbase&amp;lt;/artifactId&amp;gt;
-    &amp;lt;scope&amp;gt;test&amp;lt;/scope&amp;gt;
-&amp;lt;/dependency&amp;gt;
-&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.testcontainers&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;junit-jupiter&amp;lt;/artifactId&amp;gt;
-    &amp;lt;scope&amp;gt;test&amp;lt;/scope&amp;gt;
-&amp;lt;/dependency&amp;gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;To use Testcontainers in our Junit 5 test class, we start with a Couchbase container configured with a bucket named &lt;code&gt;test&lt;/code&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@Testcontainers
-public class CouchbaseConsumerTests {
-
-	@Container
-	static CouchbaseContainer container = new CouchbaseContainer("couchbase/server:6.6.0")
-			.withBucket(new BucketDefinition("test"));&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The &lt;code&gt;@Testcontainers&lt;/code&gt; annotation enables lifecycle management for fields annotated with &lt;code&gt;@Container&lt;/code&gt;.
-Here, we declare the &lt;code&gt;CouchbaseContainer&lt;/code&gt; as &lt;code&gt;static&lt;/code&gt;, so TestContainers will start the container once before the tests run and remove it after. This is a good thing, since it takes several seconds to start the container.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="admonitionblock note"&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class="icon"&gt;
-&lt;div class="title"&gt;Note&lt;/div&gt;
-&lt;/td&gt;
-&lt;td class="content"&gt;
-Also take a look at &lt;a href="https://github.com/Playtika/testcontainers-spring-boot"&gt;Playtika Testcontainers for Spring Boot&lt;/a&gt;. This is an interesting project that abstracts "embedded" services using Spring Boot to autoconfigure a Testcontainer. This requires your preferred version of &lt;code&gt;org.springframework.cloud:spring-cloud-starter&lt;/code&gt;.  If you are using a Spring Cloud version compatible with Spring Boot 2.4+ you will need to set &lt;code&gt;"spring.cloud.bootstrap.enabled=true"&lt;/code&gt;.  The sample does not use this library because Spring beans cannot be declared &lt;code&gt;static&lt;/code&gt;, so we would have to start a new container instance for each test. Anyway, Testcontainers is really easy to use.
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;As mentioned above, different property configurations represent different test cases. Spring Boot binds properties from its properties sources when the application starts up. So we need to create a new application context for each combination of properties we want to test. We see a few different strategies used in the &lt;a href="https://github.com/spring-cloud/stream-applications"&gt;stream-applications&lt;/a&gt; repository:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="ulist"&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;Create an abstract &lt;code&gt;@SpringBootTest&lt;/code&gt; to configure a &lt;code&gt;@SpringBootApplication&lt;/code&gt; test context and shared configuration properties. Create a sub class, annotated with &lt;code&gt;@TestPropertySource&lt;/code&gt; for each test case, as shown &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/functions/consumer/s3-consumer/src/test/java/org/springframework/cloud/fn/consumer/s3"&gt;here&lt;/a&gt;.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Use &lt;a href="https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/test/context/runner/ApplicationContextRunner.html"&gt;ApplicationContextRunner&lt;/a&gt; to create a new &lt;code&gt;ApplicationContext&lt;/code&gt; for each test case, as shown &lt;a href="https://github.com/spring-cloud/stream-applications/blob/master/functions/supplier/sftp-supplier/src/test/java/org/springframework/cloud/fn/supplier/sftp/SftpSupplierApplicationTests.java"&gt;here&lt;/a&gt;.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Use &lt;a href="https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/builder/SpringApplicationBuilder.html"&gt;SpringApplicationBuilder&lt;/a&gt; to create a new &lt;code&gt;ApplicationContext&lt;/code&gt; for each test case, as shown &lt;a href="https://github.com/spring-cloud/stream-applications/blob/master/functions/function/task-launch-request-function/src/test/java/org/springframework/cloud/fn/task/launch/request/TaskLaunchRequestFunctionApplicationTests.java"&gt;here&lt;/a&gt;.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Which one you use depends largely on personal choice. The tests for the sample function use the &lt;code&gt;ApplicationContextRunner&lt;/code&gt;, pre-configured with the required boot Couchbase connection properties provided by the test container. A nice feature of Testcontainers is that it exposes standard ports as expected, mapping each exposed port to a random available port. The Couchbase testContainer includes &lt;code&gt;getConnectionString()&lt;/code&gt; which is specific to Couchbase. Generally, you can use &lt;code&gt;container.getMappedPort(int originalPort)&lt;/code&gt; as required.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="admonitionblock tip"&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class="icon"&gt;
-&lt;div class="title"&gt;Tip&lt;/div&gt;
-&lt;/td&gt;
-&lt;td class="content"&gt;
-Using random TCP ports is essential for automated tests since 1) You do not know what ports may be in use for a given environment 2) Build tools typically run tests in parallel. This frequently results in errors due to an unavailable port when statically defined.
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@Testcontainers
-public class CouchbaseConsumerTests {
-
-    @Container
-    static CouchbaseContainer container =
-            new CouchbaseContainer("couchbase/server:6.6.0")
-                   .withBucket(new BucketDefinition("test"));
-
-	private ApplicationContextRunner applicationContextRunner;
-
-    @BeforeEach
-    void setup() {
-        applicationContextRunner = new ApplicationContextRunner()
-            .withUserConfiguration(TestConfig.class)
-            .withPropertyValues(
-                 "spring.couchbase.connection-string=" +
-                                                container.getConnectionString(),
-                 "spring.couchbase.username=" + container.getUsername(),
-                 "spring.couchbase.password=" + container.getPassword());
-    }&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;We use &lt;code&gt;TestConfig.class&lt;/code&gt; to start an application context, which we provide as an inner class:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@SpringBootApplication
-static class TestConfig {
-    @Autowired
-    Cluster cluster;
-
-   @PreDestroy
-    public void destroy() {
-        cluster.disconnect();
-    }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;In many cases, this can be an empty class annotated with &lt;code&gt;@SpringBootApplication&lt;/code&gt; to trigger properties binding, and any required auto configuration - &lt;code&gt;CouchbaseAutoConfiguration&lt;/code&gt; in this case. Here, we disconnect from the cluster to prevent a superfluous stack trace when the context closes.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;For these tests, we will create a simple &lt;code&gt;User&lt;/code&gt; type with a name and an email address which we can use for the key:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@JsonIgnoreProperties(ignoreUnknown = true)
-public class User {
-	private String name;
-
-	private String email;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public User() {
-	}
-
-	public User(String name, String email) {
-		this.name = name;
-		this.email = email;
-	}
-    ...&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Now we are ready to test our function. Since the function is reactive, we will use the &lt;code&gt;StepVerifier&lt;/code&gt; from the &lt;code&gt;reactor-test&lt;/code&gt; library to verify the contents of the returned Flux.
-We begin with the simplest happy path scenario:  &lt;em&gt;upsert&lt;/em&gt; a single User providing the minimum required configuration: The bucket name and the key expression. We will construct a &lt;code&gt;Message&lt;/code&gt; with a &lt;code&gt;User&lt;/code&gt; payload. To store the user into the &lt;code&gt;test&lt;/code&gt; bucket&amp;#8217;s default collection, using the user&amp;#8217;s email as the key, we just need to provide the bucket name as a literal and set the key expression to &lt;code&gt;payload.email&lt;/code&gt;. These properties need to use the &lt;code&gt;couchbase.consumer&lt;/code&gt; prefix configured in &lt;code&gt;CouchbaseConsumerProperties&lt;/code&gt;. At least, that&amp;#8217;s the intended behavior.
-We can&amp;#8217;t be sure that all this works until we can verify that ,after calling the function, the data is present in the data store. We use the Couchbase API directly to retrieve the data and assert that the contents are what we expect.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@Test
-void singleUpsert() {
-   applicationContextRunner.withPropertyValues(
-           "couchbase.consumer.bucketExpression='test'",
-            "couchbase.consumer.keyExpression=payload.email")
-      .run(context -&amp;gt; {
-           CouchbaseConsumerProperties properties =
-                    context.getBean(CouchbaseConsumerProperties.class);
-           String bucketName = properties.getBucketExpression().getValue(String.class);
-           Cluster cluster = context.getBean(Cluster.class);
-           Function&amp;lt;Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt;, Flux&amp;lt;MutationResult&amp;gt;&amp;gt;
-                 couchbaseConsumerFunction =
-                       context.getBean("couchbaseConsumerFunction", Function.class);
-           StepVerifier.create(couchbaseConsumerFunction.apply(
-               Flux.just(new GenericMessage&amp;lt;&amp;gt;(new User("David", "david@david.com")))))
-            .expectNextMatches(mutationResult -&amp;gt;
-                   mutationResult.mutationToken().get().bucketName().equals(bucketName))
-            .verifyComplete();
-
-        User saved = cluster.bucket(bucketName).defaultCollection()
-                                   .get("david@david.com").contentAs(User.class);
-       assertThat(saved.getName()).isEqualTo("David");
-  });
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;With the function implemented as previously shown, we are ecstatic to see green when we run the test in our IDE. In reality, we need a test like this to write the function in the first place. That is why we put significant thought and effort into this simple test. We also want to test applying multiple objects, and setting a custom expression for the value, and bucket. We may want to also check the Java validation annotations in our properties class.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@NotNull(message = "'keyExpression' is required")
-public Expression getKeyExpression() {
-    return keyExpression;
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;I forget, does the annotation go on the getter or the setter?, do we really need the &lt;code&gt;@Validated&lt;/code&gt; class annotation? Let&amp;#8217;s find out. If we forget to set &lt;code&gt;couchbase.consumer.keyExpression&lt;/code&gt;, we should get an exception message &lt;code&gt;'keyExpression is required'&lt;/code&gt; somewhere in the stack trace. If not, then we did something wrong. Fortunately, &lt;code&gt;spring-boot-starter-test&lt;/code&gt; gives us everything we need for testing, including &lt;a href="https://assertj.github.io/doc/AssertJ"&gt;Assertj&lt;/a&gt;, a fluent DSL for assertions, Mockito, and Junit 5.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@Test
-void keyExpressionRequired() {
-  assertThatExceptionOfType(RuntimeException.class).isThrownBy(
-   () -&amp;gt; applicationContextRunner.withPropertyValues(
-      "couchbase.consumer.bucket-expression='test'").run(context -&amp;gt; context.start()))
-    .havingRootCause()
-    .withMessageContaining("'keyExpression' is required");
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;By the time we are done, we will write more than twice the LOC needed to implement the function, and probably spend more than twice the time. But the effort is well worth it since it gives us proof that the function behaves as expected in common scenarios, and protection against introducing regressions when refactoring or adding new functionality.  The complete tests are &lt;a href="https://github.com/spring-cloud/spring-cloud-stream-samples/blob/master/function-based-stream-app-samples/couchbase-stream-applications/couchbase-consumer/src/test/java/io/spring/example/couchbase/consumer/CouchbaseConsumerTests.java"&gt;here&lt;/a&gt;.  I&amp;#8217;m happy to say that my IDE reports over 90% coverage.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="conclusion"&gt;&lt;a class="anchor" href="#conclusion"&gt;&lt;/a&gt;Conclusion&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;This concludes Part 1 of the testing topic. In this post we explored strategies for testing functions that integrate with external resources, such as Couchbase. We also showed how useful the TestContainers library is for testing components of distributed systems, especially when using mocks, stubs, or embedded servers is impractical. &lt;a href="https://spring.io/blog/2020/12/15/testing-spring-cloud-stream-applications-part-2"&gt;Part 2&lt;/a&gt; will cover unit and integration testing of function based stream applications.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="stay-tuned"&gt;&lt;a class="anchor" href="#stay-tuned"&gt;&lt;/a&gt;Stay tuned&amp;#8230;&amp;#8203;&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Thanks for coming! We hope you found this content helpful. We have a couple more posts until we conclude this series.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>Spring Cloud 2020.0.0-RC1 (aka Ilford) Is Available</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/12/15/spring-cloud-2020-0-0-rc1-aka-ilford-is-available" />
-    <category term="releases" label="Releases" />
-    <author>
-      <name>Ryan Baxter</name>
-    </author>
-    <id>tag:spring.io,2020-12-14:4302</id>
-    <updated>2020-12-15T14:22:35Z</updated>
-    <content type="html">&lt;p&gt;On behalf of the community, I am pleased to announce that Release Candidate 1 (RC1) of the &lt;a href="https://cloud.spring.io"&gt;Spring Cloud 2020&lt;/a&gt; Release Train is available today. You can find the release in the &lt;a href="https://repo.spring.io/milestone/"&gt;Spring Milestone&lt;/a&gt; repository. See the 2020 &lt;a href="https://github.com/spring-cloud/spring-cloud-release/wiki/Spring-Cloud-2020.0-Release-Notes"&gt;release notes for more information&lt;/a&gt;.&lt;/p&gt;&lt;h2&gt;&lt;a href="#notable-changes-in-the-2020-release-train" class="anchor" name="notable-changes-in-the-2020-release-train"&gt;&lt;/a&gt;Notable Changes in the 2020 Release Train&lt;/h2&gt;
-&lt;p&gt;This release requires Spring Boot 2.4.0.&lt;/p&gt;
-&lt;p&gt;See the &lt;a href="https://github.com/spring-cloud/spring-cloud-release/wiki/Spring-Cloud-2020.0-Release-Notes#breaking-changes"&gt;wiki&lt;/a&gt; for a list of all breaking changes in this release train.&lt;/p&gt;
-&lt;p&gt;See all of the included issues and pull requests at the &lt;a href="https://github.com/orgs/spring-cloud/projects/50"&gt;Github project&lt;/a&gt;.&lt;/p&gt;&lt;h3&gt;&lt;a href="#spring-cloud-contract" class="anchor" name="spring-cloud-contract"&gt;&lt;/a&gt;Spring Cloud Contract&lt;/h3&gt;
-&lt;p&gt;The Gradle plugin &lt;a href="https://github.com/spring-cloud/spring-cloud-contract/pull/1558"&gt;creates a separate classpath when executing tasks&lt;/a&gt;.&lt;/p&gt;&lt;h3&gt;&lt;a href="#spring-cloud-kubernetes" class="anchor" name="spring-cloud-kubernetes"&gt;&lt;/a&gt;Spring Cloud Kubernetes&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;Packages and starters have been refactored to &lt;a href="https://github.com/spring-cloud/spring-cloud-release/wiki/Spring-Cloud-2020.0-Release-Notes#spring-cloud-kubernetes"&gt;accommodate new Kubernetes Java Client implementations&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Starters have been added for Kubernetes Java Client implementations (&lt;a href="https://github.com/spring-cloud/spring-cloud-kubernetes/pull/687"&gt;PR&lt;/a&gt;)&lt;/li&gt;
-&lt;/ul&gt;&lt;h3&gt;&lt;a href="#spring-cloud-commons" class="anchor" name="spring-cloud-commons"&gt;&lt;/a&gt;Spring Cloud Commons&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;LoadBalancer - you can now use a custom health verification function and a RestTemplate-based mechanism with &lt;code&gt;HealthcheckServiceInstanceListSupplier&lt;/code&gt; (&lt;a href="https://github.com/spring-cloud/spring-cloud-commons/pull/866"&gt;PR&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;LoadBalancerProperties &lt;a href="https://github.com/spring-cloud/spring-cloud-commons/issues/830"&gt;have been repackaged&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Support has been added for &lt;code&gt;LoadBalancer&lt;/code&gt; selecting same instance if available (&lt;a href="https://github.com/spring-cloud/spring-cloud-gateway/pull/2066"&gt;PR&lt;/a&gt;)&lt;/li&gt;
-  &lt;li&gt;Support has been added for `LoadBalancer selecting the instance specified by a cookie, if available (&lt;a href="https://github.com/spring-cloud/spring-cloud-gateway/pull/2066"&gt;PR&lt;/a&gt;)&lt;/li&gt;
-&lt;/ul&gt;&lt;h3&gt;&lt;a href="#spring-cloud-function" class="anchor" name="spring-cloud-function"&gt;&lt;/a&gt;Spring Cloud Function&lt;/h3&gt;
-&lt;p&gt;Spring Cloud Function introduces two new features: support for &lt;a href="https://rsocket.io/"&gt;RSocket&lt;/a&gt; and &lt;a href="https://cloudevents.io/"&gt;Cloud Events&lt;/a&gt;.&lt;br/&gt;While we¡¯re in the process of updating documentation with details on these features, you can check out samples and integration test cases to get additional information now.&lt;br/&gt;For Cloud Events support, you can look at the &lt;a href="https://github.com/spring-cloud/spring-cloud-function/tree/master/spring-cloud-function-samples/function-sample-cloudevent"&gt;Cloud Events samples&lt;/a&gt; as well as a recently published &lt;a href="https://spring.io/blog/2020/12/10/cloud-events-and-spring-part-1"&gt;blog post&lt;/a&gt;.&lt;br/&gt;For RSocket support, you can look at &lt;a href="https://github.com/spring-cloud/spring-cloud-function/tree/master/spring-cloud-function-rsocket/src/test/java/org/springframework/cloud/function/rsocket"&gt;some of the test cases&lt;/a&gt; demonstrating how functions can be invoked via RSocket. &lt;/p&gt;&lt;h3&gt;&lt;a href="#spring-cloud-sleuth" class="anchor" name="spring-cloud-sleuth"&gt;&lt;/a&gt;Spring Cloud Sleuth&lt;/h3&gt;&lt;h4&gt;&lt;a href="#moving-opentelemetry-support-to-incubator" class="anchor" name="moving-opentelemetry-support-to-incubator"&gt;&lt;/a&gt;Moving OpenTelemetry support to incubator&lt;/h4&gt;
-&lt;p&gt;As OpenTelemetry continues to evolve, we have decided to move OpenTelemetry support from Spring Cloud Sleuth to an &lt;a href="https://github.com/spring-cloud-incubator/spring-cloud-sleuth-otel/"&gt;incubator project&lt;/a&gt; . To continue using OpenTelemetry with Spring Cloud Sleuth, you will need to add the Spring repositories, the &lt;code&gt;spring-cloud-sleuth-otel-dependencies&lt;/code&gt; BOM, and the &lt;code&gt;spring-cloud-sleuth-otel-autoconfigure&lt;/code&gt; dependency.&lt;/p&gt;
-&lt;p&gt;We have released a &lt;code&gt;1.0.0-M1&lt;/code&gt; of Spring Cloud Sleuth OTel that is compatible with the &lt;code&gt;2020.0.0-RC1&lt;/code&gt; release train. The following listings show how to use it in Maven and Gradle:&lt;/p&gt;
-&lt;p&gt;Maven&lt;/p&gt;
-&lt;pre&gt;&lt;code class="prettyprint xml"&gt; &amp;lt;properties&amp;gt;&#xD;
-   &amp;lt;spring-cloud-sleuth-otel.version&amp;gt;1.0.0-M1&amp;lt;/spring-cloud-sleuth-otel.version&amp;gt;&#xD;
-   &amp;lt;spring-cloud.version&amp;gt;2020.0.0-RC1&amp;lt;/spring-cloud.version&amp;gt;&#xD;
- &amp;lt;/properties&amp;gt;&#xD;
-&#xD;
- &amp;lt;dependencyManagement&amp;gt;&#xD;
-		&amp;lt;dependencies&amp;gt;&#xD;
-			&amp;lt;dependency&amp;gt;&#xD;
-				&amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;&#xD;
-				&amp;lt;artifactId&amp;gt;spring-cloud-dependencies&amp;lt;/artifactId&amp;gt;&#xD;
-				&amp;lt;version&amp;gt;${spring-cloud.version}&amp;lt;/version&amp;gt;&#xD;
-				&amp;lt;type&amp;gt;pom&amp;lt;/type&amp;gt;&#xD;
-				&amp;lt;scope&amp;gt;import&amp;lt;/scope&amp;gt;&#xD;
-			&amp;lt;/dependency&amp;gt;&#xD;
-			&amp;lt;dependency&amp;gt;&#xD;
-				&amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;&#xD;
-				&amp;lt;artifactId&amp;gt;spring-cloud-sleuth-otel-dependencies&amp;lt;/artifactId&amp;gt;&#xD;
-				&amp;lt;!-- Provide the version of the Spring Cloud Sleuth OpenTelemetry project --&amp;gt;&#xD;
-				&amp;lt;version&amp;gt;${spring-cloud-sleuth-otel.version}&amp;lt;/version&amp;gt;&#xD;
-				&amp;lt;scope&amp;gt;import&amp;lt;/scope&amp;gt;&#xD;
-				&amp;lt;type&amp;gt;pom&amp;lt;/type&amp;gt;&#xD;
-			&amp;lt;/dependency&amp;gt;&#xD;
-		&amp;lt;/dependencies&amp;gt;&#xD;
-	&amp;lt;/dependencyManagement&amp;gt;&#xD;
-&#xD;
-    &amp;lt;dependency&amp;gt;&#xD;
-        &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;&#xD;
-        &amp;lt;artifactId&amp;gt;spring-cloud-starter-sleuth&amp;lt;/artifactId&amp;gt;&#xD;
-        &amp;lt;exclusions&amp;gt;&#xD;
-            &amp;lt;exclusion&amp;gt;&#xD;
-                &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;&#xD;
-                &amp;lt;artifactId&amp;gt;spring-cloud-sleuth-brave&amp;lt;/artifactId&amp;gt;&#xD;
-            &amp;lt;/exclusion&amp;gt;&#xD;
-        &amp;lt;/exclusions&amp;gt;&#xD;
-    &amp;lt;/dependency&amp;gt;&#xD;
-    &amp;lt;dependency&amp;gt;&#xD;
-        &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;&#xD;
-        &amp;lt;artifactId&amp;gt;spring-cloud-sleuth-otel-autoconfigure&amp;lt;/artifactId&amp;gt;&#xD;
-    &amp;lt;/dependency&amp;gt;&#xD;
-&#xD;
-		&amp;lt;repositories&amp;gt;&#xD;
-			&amp;lt;repository&amp;gt;&#xD;
-				&amp;lt;id&amp;gt;spring-snapshots&amp;lt;/id&amp;gt;&#xD;
-				&amp;lt;url&amp;gt;https://repo.spring.io/snapshot&amp;lt;/url&amp;gt;&#xD;
-				&amp;lt;snapshots&amp;gt;&amp;lt;enabled&amp;gt;true&amp;lt;/enabled&amp;gt;&amp;lt;/snapshots&amp;gt;&#xD;
-			&amp;lt;/repository&amp;gt;&#xD;
-			&amp;lt;repository&amp;gt;&#xD;
-				&amp;lt;id&amp;gt;spring-milestones&amp;lt;/id&amp;gt;&#xD;
-				&amp;lt;url&amp;gt;https://repo.spring.io/milestone&amp;lt;/url&amp;gt;&#xD;
-			&amp;lt;/repository&amp;gt;&#xD;
-		&amp;lt;/repositories&amp;gt;&#xD;
-		&amp;lt;pluginRepositories&amp;gt;&#xD;
-			&amp;lt;pluginRepository&amp;gt;&#xD;
-				&amp;lt;id&amp;gt;spring-snapshots&amp;lt;/id&amp;gt;&#xD;
-				&amp;lt;url&amp;gt;https://repo.spring.io/snapshot&amp;lt;/url&amp;gt;&#xD;
-			&amp;lt;/pluginRepository&amp;gt;&#xD;
-			&amp;lt;pluginRepository&amp;gt;&#xD;
-				&amp;lt;id&amp;gt;spring-milestones&amp;lt;/id&amp;gt;&#xD;
-				&amp;lt;url&amp;gt;https://repo.spring.io/milestone&amp;lt;/url&amp;gt;&#xD;
-			&amp;lt;/pluginRepository&amp;gt;&#xD;
-		&amp;lt;/pluginRepositories&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Gradle&lt;/p&gt;
-&lt;pre&gt;&lt;code class="prettyprint"&gt;ext {&#xD;
-  springCloudSleuthOtelVersion = &amp;quot;1.0.0-M1&amp;quot;&#xD;
-  springCloudVersion = &amp;quot;2020.0.0-RC1&amp;quot;&#xD;
-}&#xD;
-&#xD;
-dependencyManagement {&#xD;
-    imports {&#xD;
-        mavenBom &amp;quot;org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}&amp;quot;&#xD;
-        mavenBom &amp;quot;org.springframework.cloud:spring-cloud-sleuth-otel-dependencies:${springCloudSleuthOtelVersion}&amp;quot;&#xD;
-    }&#xD;
-}&#xD;
-&#xD;
-dependencies {&#xD;
-    implementation(&amp;quot;org.springframework.cloud:spring-cloud-starter-sleuth&amp;quot;) {&#xD;
-        exclude group: &amp;#39;org.springframework.cloud&amp;#39;, module: &amp;#39;spring-cloud-sleuth-brave&amp;#39;&#xD;
-    }&#xD;
-    implementation &amp;quot;org.springframework.cloud:spring-cloud-sleuth-otel-autoconfigure&amp;quot;&#xD;
-}&#xD;
-&#xD;
-repositories {&#xD;
-    mavenCentral()&#xD;
-    maven {&#xD;
-            url &amp;quot;https://repo.spring.io/snapshot&amp;quot;&#xD;
-    }&#xD;
-    maven {&#xD;
-            url &amp;quot;https://repo.spring.io/milestone&amp;quot;&#xD;
-    }&#xD;
-    maven {&#xD;
-            url &amp;quot;https://repo.spring.io/release&amp;quot;&#xD;
-    }&#xD;
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a href="#spring-cloud-task" class="anchor" name="spring-cloud-task"&gt;&lt;/a&gt;Spring Cloud Task&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;Added ability for the user to utilize external DBs for Multi-DB &lt;a href="https://github.com/spring-cloud/spring-cloud-task/issues/690"&gt;sample&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Spring Cloud Task now supports &lt;a href="https://github.com/spring-cloud/spring-cloud-task/issues/645"&gt;&lt;code&gt;JobApplicationRunner&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Single-step Batch Job sample now supports &lt;a href="https://github.com/spring-cloud/spring-cloud-task/issues/745"&gt;AMQP and Kafka&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;&lt;h3&gt;&lt;a href="#spring-cloud-gateway" class="anchor" name="spring-cloud-gateway"&gt;&lt;/a&gt;Spring Cloud Gateway&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;LoadBalancer Lifecycle support has been added (&lt;a href="https://github.com/spring-cloud/spring-cloud-gateway/pull/2066"&gt;PR&lt;/a&gt;)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;The following modules were updated as part of 2020.0.0-RC1:&lt;/p&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Module &lt;/th&gt;
-      &lt;th&gt;Version &lt;/th&gt;
-      &lt;th&gt;Issues&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Circuitbreaker &lt;/td&gt;
-      &lt;td&gt;2.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-circuitbreaker/milestone/7?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Contract &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-contract/milestone/73?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Kubernetes &lt;/td&gt;
-      &lt;td&gt;2.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-kubernetes/milestone/27?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Commons &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Openfeign &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Cloudfoundry &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Security &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Bus &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Cli &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Zookeeper &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-zookeeper/milestone/32?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Sleuth &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-sleuth/milestone/85?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Consul &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Gateway &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Netflix &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-netflix/milestone/97?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Vault &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-vault/milestone/43?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Config &lt;/td&gt;
-      &lt;td&gt;3.0.0-RC1 &lt;/td&gt;
-      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-config/milestone/83?closed=1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Spring Cloud Task &lt;/td&gt;
-      &lt;td&gt;2.3.0-RC1 &lt;/td&gt;
-      &lt;td&gt;(&lt;a href="https://github.com/spring-cloud/spring-cloud-task/releases/tag/2.3.0-RC1"&gt;issues&lt;/a&gt;)&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;As always, we welcome feedback on &lt;a href="https://github.com/spring-cloud/"&gt;GitHub&lt;/a&gt;, on &lt;a href="https://gitter.im/spring-cloud/spring-cloud"&gt;Gitter&lt;/a&gt;, on &lt;a href="https://stackoverflow.com/questions/tagged/spring-cloud"&gt;Stack Overflow&lt;/a&gt;, or on &lt;a href="https://twitter.com/SpringCloud"&gt;Twitter&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;The following listings show how to get started with Maven with a BOM (dependency management only) or with Gradle:&lt;/p&gt;
-&lt;p&gt;Maven with BOM:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="prettyprint"&gt;&lt;br/&gt;    &amp;lt;repositories&amp;gt;&#xD;
-        &amp;lt;repository&amp;gt;&#xD;
-            &amp;lt;id&amp;gt;spring-milestones&amp;lt;/id&amp;gt;&#xD;
-            &amp;lt;name&amp;gt;Spring Milestones&amp;lt;/name&amp;gt;&#xD;
-            &amp;lt;url&amp;gt;https://repo.spring.io/milestone&amp;lt;/url&amp;gt;&#xD;
-            &amp;lt;snapshots&amp;gt;&#xD;
-                &amp;lt;enabled&amp;gt;false&amp;lt;/enabled&amp;gt;&#xD;
-            &amp;lt;/snapshots&amp;gt;&#xD;
-        &amp;lt;/repository&amp;gt;&#xD;
-    &amp;lt;/repositories&amp;gt;&#xD;
-&amp;lt;dependencyManagement&amp;gt;&#xD;
-    &amp;lt;dependencies&amp;gt;&#xD;
-        &amp;lt;dependency&amp;gt;&#xD;
-            &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;&#xD;
-            &amp;lt;artifactId&amp;gt;spring-cloud-dependencies&amp;lt;/artifactId&amp;gt;&#xD;
-            &amp;lt;version&amp;gt;2020.0.0-RC1&amp;lt;/version&amp;gt;&#xD;
-            &amp;lt;type&amp;gt;pom&amp;lt;/type&amp;gt;&#xD;
-            &amp;lt;scope&amp;gt;import&amp;lt;/scope&amp;gt;&#xD;
-        &amp;lt;/dependency&amp;gt;&#xD;
-    &amp;lt;/dependencies&amp;gt;&#xD;
-&amp;lt;/dependencyManagement&amp;gt;&#xD;
-&amp;lt;dependencies&amp;gt;&#xD;
-    &amp;lt;dependency&amp;gt;&#xD;
-        &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;&#xD;
-        &amp;lt;artifactId&amp;gt;spring-cloud-starter-config&amp;lt;/artifactId&amp;gt;&#xD;
-    &amp;lt;/dependency&amp;gt;&#xD;
-    &amp;lt;dependency&amp;gt;&#xD;
-        &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;&#xD;
-        &amp;lt;artifactId&amp;gt;spring-cloud-starter-netflix-eureka-client&amp;lt;/artifactId&amp;gt;&#xD;
-    &amp;lt;/dependency&amp;gt;&#xD;
-    ...&#xD;
-&amp;lt;/dependencies&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Gradle:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="prettyprint"&gt;buildscript {&#xD;
-dependencies {&#xD;
-classpath &amp;quot;io.spring.gradle:dependency-management-plugin:1.0.2.RELEASE&amp;quot;&#xD;
-}&#xD;
-}&#xD;
-&#xD;
-repositories {&#xD;
-maven {&#xD;
-url &amp;#39;https://repo.spring.io/milestone&amp;#39;&#xD;
-}&#xD;
-}&#xD;
-&#xD;
-apply plugin: &amp;quot;io.spring.dependency-management&amp;quot;&#xD;
-&#xD;
-dependencyManagement {&#xD;
-imports {&#xD;
-mavenBom &amp;#39;org.springframework.cloud:spring-cloud-dependencies:2020.0.0-RC1&amp;#39;&#xD;
-}&#xD;
-}&#xD;
-&#xD;
-dependencies {&#xD;
-compile &amp;#39;org.springframework.cloud:spring-cloud-starter-config&amp;#39;&#xD;
-compile &amp;#39;org.springframework.cloud:spring-cloud-starter-netflix-eureka-client&amp;#39;&#xD;
-...&#xD;
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>A Bootiful Podcast: Spring Batch co-lead Mahmoud Ben Hassine</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/12/15/a-bootiful-podcast-spring-batch-co-lead-mahmoud-ben-hassine" />
-    <category term="engineering" label="Engineering" />
-    <author>
-      <name>Josh Long</name>
-    </author>
-    <id>tag:spring.io,2020-12-15:4305</id>
-    <updated>2020-12-15T04:43:30Z</updated>
-    <content type="html">&lt;p&gt;Hi, Spring fans! In this special midweek installment I correct a mistake I made last week when I inadvertently released the episode featuring Dion Almaer, with the interview I conducted with Spring Batch co-lead Mahmoud Ben Hassine. This is the actual episode with Mahmoud Ben Hassine, with the correct title and everything! Enjoy!&lt;/p&gt;
-&lt;iframe title="Spring Batch co-lead Mahmoud Ben Hassine" height="122" width="100%" style="border: none;" scrolling="no" data-name="pb-iframe-player" src="https://www.podbean.com/media/player/rpgt4-f50e00?from=pb6admin&amp;download=1&amp;version=1&amp;auto=0&amp;share=1&amp;download=1&amp;rtl=0&amp;fonts=Helvetica&amp;skin=1&amp;pfauth=&amp;btn-skin=107"&gt;&lt;/iframe&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>A Bootiful Podcast: open-web legend Dion Almaer</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/12/14/a-bootiful-podcast-open-web-legend-dion-almaer" />
-    <category term="engineering" label="Engineering" />
-    <author>
-      <name>Josh Long</name>
-    </author>
-    <id>tag:spring.io,2020-12-11:4297</id>
-    <updated>2020-12-14T23:00:00Z</updated>
-    <content type="html">&lt;p&gt;Hi, Spring fans! In this special midweek installment I (Josh Long) correct a mistake I made last week when I inadvertently released the episode featuring open-web legend Dion Almaer with the interview I conducted with the inspirational and oh-so-amazing Spring Batch co-lead Mahmoud Ben Hassine. This is the actual episode with &lt;a href="http://twitter.com/dalmaer"&gt;Dion Almaer (@dalmaer)&lt;/a&gt; who is known for so many contributions to the Java ecosystem and beyond. I know him as a former editor in chief of TheServerSide.com, but you may know him for his work championing the open web at Palm, Walmart, and Google, and many more. &lt;/p&gt;
-&lt;iframe title="Open web legend Dion Almaer" height="122" width="100%" style="border: none;" scrolling="no" data-name="pb-iframe-player" src="https://www.podbean.com/media/player/awqpe-f50e26?from=pb6admin&amp;download=1&amp;version=1&amp;auto=0&amp;share=1&amp;download=1&amp;rtl=0&amp;fonts=Helvetica&amp;skin=1&amp;pfauth=&amp;btn-skin=107"&gt;&lt;/iframe&gt;
-&lt;!-- rendered by Sagan Renderer Service --&gt;</content>
-  </entry>
-  <entry>
-    <title>Case Study: Change Data Capture (CDC) Analysis with CDC Debezium source and Analytics sink in Real-Time</title>
-    <link rel="alternate" href="https://spring.io/blog/2020/12/14/case-study-change-data-capture-cdc-analysis-with-cdc-debezium-source-and-analytics-sink-in-real-time" />
-    <category term="engineering" label="Engineering" />
-    <author>
-      <name>Christian Tzolov</name>
-    </author>
-    <id>tag:spring.io,2020-12-10:4295</id>
-    <updated>2020-12-14T16:30:00Z</updated>
-    <content type="html">&lt;div class="paragraph"&gt;
-&lt;p&gt;This article is part of a blog series that explores the newly redesigned Spring Cloud Stream applications based on Java Functions.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Here are all the previous parts of this blog series.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="ulist"&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/07/13/introducing-java-functions-for-spring-cloud-stream-applications-part-0"&gt;Introducing Function Based Streaming Applications&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/07/20/introducing-java-functions-for-spring-cloud-stream-applications-part-1"&gt;Function Composition with Streaming Applications&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/07/27/creating-a-supplier-function-and-generating-spring-cloud-stream-source"&gt;How to Build a Supplier and Source Application&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/08/03/creating-a-function-for-consuming-data-and-generating-spring-cloud-stream-sink-applications"&gt;How to Build a Consumer and Sink Application&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/08/10/case-study-build-and-run-a-streaming-application-using-an-http-source-and-a-jdbc-sink"&gt;Build and Run a Simple Stream Application&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/08/17/case-study-http-request-function-and-processor"&gt;Case Study: HTTP Request Function and Processor&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/08/25/case-study-reading-from-a-file-and-writing-to-mongodb"&gt;Case Study: File Source and MongoDB Sink&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/09/10/case-study-relational-database-source-and-file-sink"&gt;Case Study: Relational Database Source and File Sink&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/09/29/case-study-remote-file-ingest-with-spring-cloud-data-flow"&gt;Case Study: Remote File Ingest with Spring Cloud Data Flow&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/10/26/case-study-aggregator-function-and-processor"&gt;Case Study: Aggregator Function and Processor&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://spring.io/blog/2020/11/16/case-study-elasticsearch-sink"&gt;Case Study: Elasticsearch sink&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;In this post, we will look at the &lt;a href="https://github.com/spring-cloud/stream-applications/blob/master/applications/source/cdc-debezium-source/README.adoc"&gt;Debezium CDC source&lt;/a&gt; that allows us to capture database changes from databases such as MySQL, PostgreSQL, MongoDB, Oracle, DB2 and SQL Server and process those changes, in real-time, over various message binders, such as RabbitMQ, Apache Kafka, Azure Event Hubs, Google PubSub and Solace PubSub+ to name a few.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Also we will reveal how to use the &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/applications/sink/analytics-sink"&gt;Analytics sink&lt;/a&gt; to convert the captured database changes into metrics and publish them to various monitoring systems for further analysis.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;This article starts by explaining the &lt;code&gt;CDC supplier&lt;/code&gt; and the &lt;code&gt;Analytics consumer&lt;/code&gt; components, showing how to customize and use them programmatically in your own Spring applications. Next we explain how the &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/applications/source/cdc-debezium-source"&gt;CDC source&lt;/a&gt; and the &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/applications/sink/analytics-sink"&gt;Analytics sink&lt;/a&gt;, build upon the supplier and the consumer,  to provide  out of the box, ready to use streaming applications.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Finally we will demo how easy is it to use &lt;a href="https://dataflow.spring.io"&gt;Spring Cloud Data Flow (SCDF)&lt;/a&gt; for deploying streaming pipelines that react, in real-time, to database updates, convert the change events into analytics metrics and publish them to Prometheus for analysis and visualization with Grafana:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="videoblock"&gt;
-&lt;div class="content"&gt;
-&lt;iframe width="100%" height="480" src="https://www.youtube.com/embed/nNHAw8Cj7pM?rel=0" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="change-data-capture"&gt;&lt;a class="anchor" href="#change-data-capture"&gt;&lt;/a&gt;Change Data Capture&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Change Data Capture (CDC) is a technique for observing all data changes written to a database and publishing them as events that can be processed in a streamed fashion.
-As your application database is always changing, the CDC allows you to react to those  changes and lets your applications stream every row-level change in the same order as they were committed to the database.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;CDC enables a multitude of use-cases such as: cache invalidation, in-memory data views,  update search indexes, data replication by  keeping different data sources in sync, real-time fraud detection, storing audit trails, data provenance and much more.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The Spring Cloud Data Flow &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/applications/source/cdc-debezium-source"&gt;CDC Source&lt;/a&gt; application is built around &lt;a href="https://debezium.io/"&gt;Debezium&lt;/a&gt;, a popular, open source, log-based CDC implementation that supports various databases.
-The CDC Source supports a variety of message binders, including Apache Kafka, Rabbit MQ, Azure Event Hubs, Google PubSub, Solace PubSub+.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="admonitionblock note"&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class="icon"&gt;
-&lt;div class="title"&gt;Note&lt;/div&gt;
-&lt;/td&gt;
-&lt;td class="content"&gt;
-The &lt;code&gt;CDC source&lt;/code&gt; implementation embeds the &lt;a href="https://debezium.io/documentation/reference/development/engine.html"&gt;Debezium Engine&lt;/a&gt; and it does not depend on Apache Kafka nor ZooKeeper!
-You can use the &lt;code&gt;CDC source&lt;/code&gt; along with any of the supported message binders!
-The the &lt;code&gt;Debezium Engine&lt;/code&gt; though comes with some &lt;a href="https://debezium.io/documentation/reference/development/engine.html#_handling_failures"&gt;limitations&lt;/a&gt; to be considered.
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="cdc-debezium-supplier"&gt;&lt;a class="anchor" href="#cdc-debezium-supplier"&gt;&lt;/a&gt;CDC Debezium Supplier&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/functions/supplier/cdc-debezium-supplier"&gt;CDC Debezium Supplier&lt;/a&gt; is implemented as &lt;code&gt;java.util.function.Supplier&lt;/code&gt; bean which when invoked will deliver the contents of the files in a given directory. The file supplier has the following signature:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;Supplier&amp;lt;Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The users of the supplier can subscribe to the returned &lt;code&gt;Flux&amp;lt;Message&amp;lt;?&amp;gt;&lt;/code&gt;, which is a stream of messages or &lt;a href="https://debezium.io/documentation/reference/configuration/event-flattening.html#_change_event_structure"&gt;CDC Change Events&lt;/a&gt;, that have a complex structure. Each event consists of three parts (e.g. &lt;code&gt;metadata&lt;/code&gt;, &lt;code&gt;before&lt;/code&gt; and &lt;code&gt;after&lt;/code&gt;) as shown in the following payload sample:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="json"&gt;{
-  "before": { ... },  // row data before the change.
-  "after": { ... },  // row data after the change.
-  "source": {  //  the names of the database and table where the change was made.
-    "connector": "mysql", "server_id": 223344,"snapshot": "false",
-    "name": "my-app-connector", "file": "mysql-bin.000003", "pos": 355, "row": 0,
-    "db": "inventory",  // source database name.
-    "table": "customers", // source table name.
-  },
-  "op": "u",  // operation that made the change.
-  "ts_ms": 1607440256301, // timestamp - when the change was made.
-  "transaction": null  // transaction information (optional).
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;If the &lt;code&gt;cdc.flattening.enabled&lt;/code&gt; property is set to &lt;code&gt;true&lt;/code&gt;, then only the &lt;code&gt;after&lt;/code&gt; section is passed as a standalone message.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;In order to invoke the CDC supplier, we need to specify a source database to receive the CDC events from. The &lt;code&gt;cdc.connector&lt;/code&gt; property is used to choose between the supported &lt;code&gt;mysql&lt;/code&gt;, &lt;code&gt;postgres&lt;/code&gt;, &lt;code&gt;sql server&lt;/code&gt;, &lt;code&gt;db2&lt;/code&gt;, &lt;code&gt;oracle&lt;/code&gt;, &lt;code&gt;cassandra&lt;/code&gt; and &lt;code&gt;mongo&lt;/code&gt; source database types..
-The &lt;code&gt;cdc.config.database.*&lt;/code&gt; properties help to configure the the source access. Here is a sample configuration for connecting to a MySQL databases:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code&gt;# DB type
-cdc.connector=mysql
-
-# DB access
-cdc.config.database.user=debezium
-cdc.config.database.password=dbz
-cdc.config.database.hostname=localhost
-cdc.config.database.port=3306
-
-# DB source metadata
-cdc.name=my-sql-connector
-cdc.config.database.server.id=85744
-cdc.config.database.server.name=my-app-connector&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The &lt;code&gt;cdc.name, cdc.config.database.server.id&lt;/code&gt; and &lt;code&gt;cdc.config.database.server.name&lt;/code&gt; properties are used to identify and dispatch the incoming events.
-Optionally you can set the &lt;code&gt;cdc.flattening.enabled=true&lt;/code&gt; to flatten the CDC events to replace the original change event with only its after field to create a simple Kafka record.
-Optionally use the &lt;code&gt;cdc.schema=true&lt;/code&gt; to include the DB schema to the CDC events.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="admonitionblock note"&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class="icon"&gt;
-&lt;div class="title"&gt;Note&lt;/div&gt;
-&lt;/td&gt;
-&lt;td class="content"&gt;
-The source database must be configured to expose its &lt;code&gt;Write-Ahead Log API&lt;/code&gt; for the Debezium to be able to connect and consume CDC events. The &lt;a href="https://debezium.io/documentation/reference/connectors/index.html"&gt;Debezium Connector Documentation&lt;/a&gt; provides fine description of how to enable the CDC for any of the supported databases.
-For the purpose of our demos here we will use a preconfigured &lt;a href="https://hub.docker.com/r/debezium/example-mysql"&gt;MySQL docker image&lt;/a&gt;.
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;div class="sect2"&gt;
-&lt;h3 id="reusing-cdc-supplier-in-custom-applications"&gt;&lt;a class="anchor" href="#reusing-cdc-supplier-in-custom-applications"&gt;&lt;/a&gt;Reusing CDC Supplier in custom applications&lt;/h3&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The CDC supplier is a reusable Spring bean that we can inject in end-user custom applications. Once injected, this can be directly invoked and combined with custom processing of the data. Here is an example.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;@Autowired
-Supplier&amp;lt;Flux&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt;&amp;gt; cdcSupplier;
-
-public void consumeDataAndSendEmail() {
-  Flux&amp;lt;Message&amp;lt;?&amp;gt; cdcData = cdcSupplier.get();
-  messageFlux.subscribe(t -&amp;gt; {
-      if (t == something)
-         //send the email here.
-      }
-  }
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;In the above pseudo-code, we inject the CDC supplier bean and then use it to invoke its &lt;code&gt;get()&lt;/code&gt; method to get a Flux. We then subscribe to that &lt;a href="https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html"&gt;Flux&lt;/a&gt; and each time we receive any data through the Flux, apply some filtering, and take actions based on that. This is just a simple illustration to show how we can reuse the CDC supplier. When you try this in a real application, you probably need to make more adjustments in your implementation, such as converting the default data type of the received data from &lt;code&gt;byte[]&lt;/code&gt; into something else before doing the conditional check.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="admonitionblock tip"&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class="icon"&gt;
-&lt;div class="title"&gt;Tip&lt;/div&gt;
-&lt;/td&gt;
-&lt;td class="content"&gt;
-For building a standalone, non-streaming, application you can leverage the &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/functions/common/cdc-debezium-boot-starter"&gt;cdc-debezium-boot-starter&lt;/a&gt;. Just add the &lt;code&gt;cdc-debezium-boot-starter&lt;/code&gt; dependency and implement your custom &lt;code&gt;Consumer&amp;lt;SourceRecord&amp;gt;&lt;/code&gt; handler to process the incoming database change events.
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect2"&gt;
-&lt;h3 id="cdc-debezium-source"&gt;&lt;a class="anchor" href="#cdc-debezium-source"&gt;&lt;/a&gt;CDC Debezium Source&lt;/h3&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;As we have seen in this blog series, all the out of the box Spring Cloud Stream source applications are already autoconfigured with several out of the box general-purpose processors. You can activate these processors as part of the &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/applications/source/cdc-debezium-source"&gt;CDC source&lt;/a&gt;. Here is an example, where we run the CDC source and receive the data and then transforms the consumed data before sending it out to the destination on middleware.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="bash"&gt;java -jar cdc-debezium-source.jar
- --cdc.connector=mysql --cdc.name=my-sql-connector
- --cdc.config.database.server.name=my-app-connector
- --cdc.config.database.user=debezium --cdc.config.database.password=dbz
- --cdc.config.database.hostname=localhost --cdc.config.database.port=3306
- --cdc.schema=true
- --cdc.flattening.enabled=true
- --spring.cloud.function.definition=cdcSupplier|spelFunction
- --spel.function.expression=payload.toUpperCase()&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;By providing the value, &lt;code&gt;cdcSupplier|spelFunction&lt;/code&gt; for the &lt;code&gt;spring.cloud.function.definition&lt;/code&gt; property, we are activating the spel function composed with the CDC supplier. Then we provide a SpEL expression that we want to use to transform the data using &lt;code&gt;spel.function.expression&lt;/code&gt;. There are several other functions available to compose this way. Take a look &lt;a href="https://github.com/spring-cloud/stream-applications/blob/master/docs/FunctionComposition.adoc"&gt;here&lt;/a&gt; for more details.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="analytics-consumer"&gt;&lt;a class="anchor" href="#analytics-consumer"&gt;&lt;/a&gt;Analytics Consumer&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/functions/consumer/analytics-consumer"&gt;Analytics consumer&lt;/a&gt; provides a function that computes analytics from the input data messages and publishes them as metrics to various monitoring systems. It leverages the &lt;a href="https://micrometer.io/"&gt;micrometer library&lt;/a&gt; for providing a uniform programming experience across the most popular &lt;a href="https://micrometer.io/docs"&gt;monitoring systems&lt;/a&gt; and uses &lt;a href="https://docs.spring.io/spring-integration/reference/html/spel.html#spel"&gt;Spring Expression Language (SpEL)&lt;/a&gt; for defining how the metric names, values and tags are computed from the input data.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;We can use the consumer bean directly in our custom applications to compute analytics from the passing messages. Here is the type signature of the Analytics consumer bean:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="java"&gt;Consumer&amp;lt;Message&amp;lt;?&amp;gt;&amp;gt; analyticsConsumer&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Once injected into a custom application, users can directly invoke the &lt;code&gt;accept()&lt;/code&gt; method of the consumer and provide a &lt;code&gt;Message&amp;lt;?&amp;gt;&lt;/code&gt; object to compute and publish the analytics to the backend monitoring system.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The &lt;a href="https://docs.spring.io/spring-integration/reference/html/message.html"&gt;Message&lt;/a&gt; is a generic container for data. Each Message instance includes a &lt;code&gt;payload&lt;/code&gt; and &lt;code&gt;headers&lt;/code&gt; containing user-extensible properties as key-value pairs.
-The SpEL expressions are used to access message¡¯s headers and payload to compute metrics amounts and tags.
-For example a counter metrics can have a value &lt;code&gt;amount&lt;/code&gt; computed from the size of the input message payload add a &lt;code&gt;my_tag&lt;/code&gt; tag, extracted from the &lt;code&gt;kind&lt;/code&gt; header value:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code&gt;analytics.amount-expression=payload.lenght()
-analytics.tag.expression.my_tag=headers['kind']&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The Analytics consumer configuration properties start with the &lt;code&gt;analytics.*&lt;/code&gt; prefix. Consult the &lt;a href="https://github.com/spring-cloud/stream-applications/blob/master/functions/consumer/analytics-consumer/src/main/java/org/springframework/cloud/fn/consumer/analytics/AnalyticsConsumerProperties.java"&gt;AnalyticsConsumerProperties&lt;/a&gt; for the available analytics properties.
-The monitoring configuration properties start with a &lt;code&gt;management.metrics.export&lt;/code&gt; prefix. For configuring a particular monitoring system follow the provided &lt;a href="https://docs.spring.io/spring-boot/docs/2.3.1.RELEASE/reference/html/production-ready-features.html#production-ready-metrics-export"&gt;configuration instructions&lt;/a&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="sect2"&gt;
-&lt;h3 id="analytics-sink"&gt;&lt;a class="anchor" href="#analytics-sink"&gt;&lt;/a&gt;Analytics Sink&lt;/h3&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;As in the case of &lt;code&gt;CDC Source&lt;/code&gt;, the Spring Cloud Stream out of the box applications already provide an &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/applications/sink/analytics-sink"&gt;Analytics sink&lt;/a&gt; based on the &lt;code&gt;Analytics consumer&lt;/code&gt;.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The sink is available for both &lt;a href="https://repo.spring.io/libs-snapshot-local/org/springframework/cloud/stream/app/mongodb-sink-kafka/3.0.0-SNAPSHOT"&gt;Apache Kafka&lt;/a&gt; and &lt;a href="https://repo.spring.io/libs-snapshot-local/org/springframework/cloud/stream/app/mongodb-sink-rabbit/3.0.0-SNAPSHOT"&gt;RabbitMQ&lt;/a&gt; binder variants.
-When used as a Spring Cloud Stream sink, the Analytics consumer is automatically configured to accept data from the respective middleware system, for example, from a Kafka topic or RabbitMQ exchange.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="running-on-spring-cloud-data-flow"&gt;&lt;a class="anchor" href="#running-on-spring-cloud-data-flow"&gt;&lt;/a&gt;Running on Spring Cloud Data Flow&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Running both &lt;code&gt;CDC source&lt;/code&gt; and &lt;code&gt;Analytics sink&lt;/code&gt; standalone was fine, but Spring Cloud Data Flow makes it really easy to run them as a pipeline. Basically we want to orchestrate data flows that looks like this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="imageblock"&gt;
-&lt;div class="content"&gt;
-&lt;img src="https://github.com/spring-cloud/stream-applications/blob/gh-pages/img/cdc-analytics/scdf-pipelines.png?raw=true" alt="scdf pipelines" width="30%"&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The &lt;code&gt;cdc-log&lt;/code&gt; pipeline deploys a &lt;code&gt;cdc-source&lt;/code&gt; that streams all database changes into a &lt;code&gt;log-sink&lt;/code&gt; using  JSON message format. In parallel the &lt;code&gt;cdc-analytics-tap&lt;/code&gt;  pipeline &lt;a href="https://dataflow.spring.io/docs/feature-guides/streams/fanin-fanout/"&gt;taps&lt;/a&gt; the &lt;code&gt;cdc-source&lt;/code&gt; output into an &lt;code&gt;analytics-sink&lt;/code&gt; to compute DB statistics from the CDC events and publish them to time-series database (TSDB) such as Prometheus or Wavefront. The Grafana dashboard is used to visualize those changes.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The Spring Cloud Data Flow &lt;a href="https://dataflow.spring.io/docs/installation/"&gt;installation instructions&lt;/a&gt; explains how to install Spring Cloud Data Flow fore any of the supported cloud platforms.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Below, we will briefly provide the steps to set up Spring Cloud Data Flow.
-First, we need to get the docker-compose files for running Spring Cloud Data Flow, &lt;a href="https://dataflow.spring.io/docs/installation/local/docker-customize/#prometheus&amp;#8212;&amp;#8203;grafana"&gt;Prometheus and Grafana&lt;/a&gt;:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code&gt;wget -O docker-compose.yml https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/v2.7.0/spring-cloud-dataflow-server/docker-compose.yml&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code&gt;wget -O docker-compose-prometheus.yml https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/v2.7.0/spring-cloud-dataflow-server/docker-compose-prometheus.yml&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Also, get this additional docker-compose file to install a source MySQL database configured to expose its write-ahead log that the cdc-debezium connects to.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code&gt;wget -O mysql-cdc.yml https://gist.githubusercontent.com/tzolov/48dec8c0db44e8086916129201cc2c8c/raw/26e1bf435d58e25ff836e415dae308edeeef2784/mysql-cdc.yml&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The mysql-cdc uses the &lt;a href="https://hub.docker.com/r/debezium/example-mysql"&gt;debezium/example-mysql&lt;/a&gt; image and comes with an inventory, sample database:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="imageblock"&gt;
-&lt;div class="content"&gt;
-&lt;img src="https://github.com/spring-cloud/stream-applications/blob/gh-pages/img/cdc-analytics/invetory-db.png?raw=true" alt="invetory db" width="50%"&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;We need to set up a few environment variables in order to run Spring Cloud Data Flow properly.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="shell"&gt;export DATAFLOW_VERSION=2.7.0
-export SKIPPER_VERSION=2.6.0
-export STREAM_APPS_URI=https://dataflow.spring.io/kafka-maven-latest-v2&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Now that we have everything ready to go, it is time to start running Spring Cloud Data Flow and all the other ancillary components.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="shell"&gt;docker-compose -f docker-compose.yml -f docker-compose-prometheus.yml -f mysql-cdc.yml up&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="admonitionblock tip"&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class="icon"&gt;
-&lt;div class="title"&gt;Tip&lt;/div&gt;
-&lt;/td&gt;
-&lt;td class="content"&gt;
-To use &lt;code&gt;RabbitMQ&lt;/code&gt; instead of &lt;code&gt;Apache Kafka&lt;/code&gt; you can download an additional docker-compose file as explained in the  &lt;a href="https://dataflow.spring.io/docs/installation/local/docker-customize/#rabbitmq-instead-of-kafka"&gt;RabbitMQ Instead of Kafka
-&lt;/a&gt; instructions, and set the &lt;code&gt;STREAM_APPS_URI&lt;/code&gt; variable to &lt;a href="https://repo.spring.io/libs-snapshot-local/org/springframework/cloud/stream/app/stream-applications-descriptor/2020.0.0-SNAPSHOT/stream-applications-descriptor-2020.0.0-SNAPSHOT.stream-apps-rabbit-maven" class="bare"&gt;https://repo.spring.io/libs-snapshot-local/org/springframework/cloud/stream/app/stream-applications-descriptor/2020.0.0-SNAPSHOT/stream-applications-descriptor-2020.0.0-SNAPSHOT.stream-apps-rabbit-maven&lt;/a&gt; instead.
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;div class="admonitionblock tip"&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class="icon"&gt;
-&lt;div class="title"&gt;Tip&lt;/div&gt;
-&lt;/td&gt;
-&lt;td class="content"&gt;
-To use Wavefront instead of Prometheus &amp;amp; Grafana, follow the &lt;a href="https://dataflow.spring.io/docs/installation/local/docker-customize/#wavefront"&gt;Wavefront&lt;/a&gt; instructions.
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Once SCDF is up and running, go to &lt;a href="http://localhost:9393/dashboard"&gt;http://localhost:9393/dashboard&lt;/a&gt;. Then go to &lt;code&gt;Streams&lt;/code&gt; on the left-hand side and select &lt;code&gt;Create Stream&lt;/code&gt;. Select &lt;code&gt;cdc-debezium&lt;/code&gt; from the source applications and &lt;code&gt;log&lt;/code&gt; and &lt;code&gt;analytics&lt;/code&gt; from the sink applications to define the &lt;code&gt;cdc-log = cdc-debezium | log&lt;/code&gt; and the &lt;code&gt;cdc-analytic-tap = :cdc-log.cdc-debezium &amp;gt; analytics&lt;/code&gt; pipelines. You can click on the application&amp;#8217;s options to select the desired properties.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;For a quicker bootstrap,  you can copy/paste the following ready to use pipeline definition snippets:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code&gt;cdc-log = cdc-debezium --cdc.name=mycdc --cdc.flattening.enabled=false --cdc.connector=mysql --cdc.config.database.user=debezium --cdc.config.database.password=dbz --cdc.config.database.dbname=inventory --cdc.config.database.hostname=mysql-cdc --cdc.config.database.port=3307 --cdc.stream.header.offset=true --cdc.config.database.server.name=my-app-connector --cdc.config.tombstones.on.delete=false | log&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code&gt;cdc-analytic-tap = :cdc-log.cdc-debezium &amp;gt; analytics --analytics.name=cdc --analytics.tag.expression.table=#jsonPath(payload,'$..table') --analytics.tag.expression.operation=#jsonPath(payload,'$..op') --analytics.tag.expression.db=#jsonPath(payload,'$..db')&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The &lt;code&gt;cdc-log&lt;/code&gt; pipeline deploys a &lt;code&gt;cdc-debezium source&lt;/code&gt; that connects to an MySQL database at &lt;code&gt;mysql-cdc:3307&lt;/code&gt; and streams the  DB change events to the &lt;code&gt;log sink&lt;/code&gt;. Consult the &lt;a href="https://github.com/spring-cloud/stream-applications/blob/master/applications/source/cdc-debezium-source/README.adoc"&gt;cdc-debezium docs&lt;/a&gt; for the available configuration options.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The &lt;code&gt;cdc-analytic-tap&lt;/code&gt; pipeline taps into the output of the &lt;code&gt;cdc-debezium source&lt;/code&gt; and streams the cdc events to an &lt;code&gt;analytics sink&lt;/code&gt;. The analytics creates a &lt;a href="https://micrometer.io/docs/concepts#_counters"&gt;metrics counter&lt;/a&gt; (called cdc) and uses &lt;a href="https://docs.spring.io/spring-integration/reference/html/spel.html#built-in-spel-functions"&gt;SpEL expressions&lt;/a&gt; to compute metrics tags (e.g. db, table and operations) from the streamed message payloads.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;For example, let¡¯s modify the &lt;code&gt;customers&lt;/code&gt; table in the MySQL &lt;code&gt;inventory&lt;/code&gt; database. The update transaction is sent as a change event to the &lt;code&gt;cdc-debezium source&lt;/code&gt;, that converts the native DB event into an uniform message payload like this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="json"&gt;{
-  "before": {
-    "id": 1004, "first_name": "Anne", "last_name": "Kretchmar", "email": "annek@noanswer.org"
-  },
-  "after": {
-    "id": 1004, "first_name": "Anne2", "last_name": "Kretchmar", "email": "annek@noanswer.org"
-  },
-  "source": {
-    "version": "1.3.1.Final", "connector": "mysql", "server_id": 223344, "thread": 5,
-    "name": "my-app-connector", "file": "mysql-bin.000003", "pos": 355, "row": 0,
-    "db": "inventory",
-    "table": "customers",
-  },
-  "op": "u",
-  "ts_ms": 1607440256301,
-  "transaction": null
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The following SpEL expressions are used to compute 3 tags (&lt;code&gt;db&lt;/code&gt;, &lt;code&gt;table&lt;/code&gt;, &lt;code&gt;operation&lt;/code&gt;) from the CDC message payload. Those tags are assigned to every cdc metrics published to Prometheus.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code&gt;--analytics.tag.expression.db=#jsonPath(payload,'$..db')
---analytics.tag.expression.table=#jsonPath(payload,'$..table')
---analytics.tag.expression.operation=#jsonPath(payload,'$..op')&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Here is a screenshot of how it should look after all the properties are selected:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="imageblock"&gt;
-&lt;div class="content"&gt;
-&lt;img src="https://github.com/spring-cloud/stream-applications/blob/gh-pages/img/cdc-analytics/scdf-create-streams.png?raw=true" alt="scdf create streams" width="100%"&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;&lt;a href="https://dataflow.spring.io/docs/stream-developer-guides/getting-started/stream/#creating-the-stream"&gt;Create&lt;/a&gt; and  &lt;a href="https://dataflow.spring.io/docs/stream-developer-guides/getting-started/stream/#deploying-a-stream"&gt;deploy&lt;/a&gt; the &lt;code&gt;cdc-log&lt;/code&gt; and the &lt;code&gt;cdc-analytics-tap&lt;/code&gt; pipelines, accepting all the default options. Optionally you can use the &lt;code&gt;Group Actions&lt;/code&gt; to deploy both streams simultaneously.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Once the streams are deployed you can check the logs of the deployed applications via the SCDF UI or using the Skipper docker container as &lt;a href="https://dataflow.spring.io/docs/stream-developer-guides/getting-started/stream/#results"&gt;explained&lt;/a&gt; in the documentation.
-If you check the logs of the Log sink application you should see the CDC JSON messages similar to those:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="imageblock"&gt;
-&lt;div class="content"&gt;
-&lt;img src="https://github.com/spring-cloud/stream-applications/blob/gh-pages/img/cdc-analytics/cdc-event-log.png?raw=true" alt="cdc event log" width="100%"&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;Next go to the Grafana Dashboard using the &lt;a href="https://dataflow.spring.io/docs/feature-guides/streams/monitoring/#data-flow-metric-buttons"&gt;buttons&lt;/a&gt; (or just open &lt;a href="http://localhost:3000"&gt;localhost:3000&lt;/a&gt;) and login as user:`admin` and password:`admin`. You can explore the &lt;code&gt;Applications&lt;/code&gt; dashboard to check the performance of the deployed pipelines.
-Now you can import the &lt;a href="https://gist.github.com/tzolov/d2a71fc58616278fb8852f5fc43d242f#file-cdc-grafana-dashboard-prometheus-json"&gt;CDC Grafana Dashboard-Prometheus.json&lt;/a&gt; dashboard and see a dashboard similar to this:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="imageblock"&gt;
-&lt;div class="content"&gt;
-&lt;img src="https://github.com/spring-cloud/stream-applications/blob/gh-pages/img/cdc-analytics/grafana-dashboard.png?raw=true" alt="grafana dashboard" width="100%"&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The following queries have been used to aggregate the &lt;code&gt;cdc_total&lt;/code&gt; metrics inside Prometheus:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code&gt;sort_desc(topk(10, sum(cdc_total) by (db, table)))
-sort_desc(topk(100, sum(cdc_total) by (op)))&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="admonitionblock tip"&gt;
-&lt;table&gt;
-&lt;tr&gt;
-&lt;td class="icon"&gt;
-&lt;div class="title"&gt;Tip&lt;/div&gt;
-&lt;/td&gt;
-&lt;td class="content"&gt;
-You can open the Prometheus UI at &lt;a href="http://localhost:9090"&gt;http://localhost:9090&lt;/a&gt; to check the configuration as well as run some ad hoc PQL queries.
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;
-&lt;/div&gt;
-&lt;div class="sect3"&gt;
-&lt;h4 id="generate-db-activity"&gt;&lt;a class="anchor" href="#generate-db-activity"&gt;&lt;/a&gt;Generate DB activity&lt;/h4&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;You can connect to the inventory CDC MySQL databases at &lt;code&gt;localhost:3307&lt;/code&gt; (user: &lt;code&gt;root&lt;/code&gt; and password: &lt;code&gt;debezium&lt;/code&gt;) and start modifying the data.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The following docker command shows how to connect to the mysql-cdc:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="bash"&gt;docker exec -it mysql-cdc  mysql -uroot -pdebezium --database=inventory&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The following  script helps to generate multiple insert, update and delete DB transactions:&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="listingblock"&gt;
-&lt;div class="content"&gt;
-&lt;pre class="prettyprint highlight"&gt;&lt;code data-lang="bash"&gt;for i in {1..100}; do docker exec -it mysql-cdc  mysql -uroot -pdebezium --database=inventory -e'INSERT INTO customers (first_name, last_name, email) VALUES ("value1", "value2", "val@bla"); UPDATE customers SET first_name="value2" WHERE first_name="value1"; DELETE FROM customers where first_name="value2";'; done&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;You will see the &lt;code&gt;log-sink&lt;/code&gt; logs reflecting those changes as well as the CDC dashboard charts updates.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="sect1"&gt;
-&lt;h2 id="conclusions-and-future-work"&gt;&lt;a class="anchor" href="#conclusions-and-future-work"&gt;&lt;/a&gt;Conclusions and future work&lt;/h2&gt;
-&lt;div class="sectionbody"&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;In this blog, we saw how the CDC-debezium supplier and the Analytics consumer functions and their corresponding Spring Cloud Stream source and sink work. The supplier and consumer functions can be injected into custom applications for combining with other business logic.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;The source and the sink applications are provided out of the box for use with Kafka and RabbitMQ middleware variants.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;You can easily build standalone applications combining the Cdc-debezium supplier with Geode consumer to create and maintain an in-memory view of your database data. Similarly you can combine the Cdc-debezium supplier with the Elasticsearch consumer for maintaining in real-time a searchable index for your database data.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;What is more exciting is that you can realize the above scenarios using the OOTB &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/applications/source/cdc-debezium-source"&gt;cdc-debezium source&lt;/a&gt; , &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/applications/sink/geode-sink"&gt;geode sink&lt;/a&gt; and &lt;a href="https://github.com/spring-cloud/stream-applications/tree/master/applications/sink/elasticsearch-sink"&gt;elasticsearch sink&lt;/a&gt; applications. You can build those pipelines over different message binders and source databases.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;This &lt;a href="https://www.infoq.com/presentations/spring-pipeline-prometheus-grafana/?utm_campaign=infoq_content&amp;amp;utm_source=twitter&amp;amp;utm_medium=feed&amp;amp;utm_term=Devops"&gt;Spring One presentation&lt;/a&gt; demonstrates an advanced use-case,  using CDC-debezium and Machine Learning to build a streaming data pipeline for credit card fraud detection.&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="imageblock"&gt;
-&lt;div class="content"&gt;
-&lt;img src="https://github.com/spring-cloud/stream-applications/blob/gh-pages/img/cdc-analytics/cdc-fraud-detection.png?raw=true" alt="cdc fraud detection" width="50%"&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="paragraph"&gt;
-&lt;p&gt;We still have a few more episodes coming up in this blog series. Please stay tuned.&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
 &lt;!-- rendered by Sagan Renderer Service --&gt;</content>
   </entry>
 </feed>

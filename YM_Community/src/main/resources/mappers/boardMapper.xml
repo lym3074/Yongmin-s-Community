@@ -22,24 +22,7 @@
 			WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
 	</select>
 	
-	<!-- 이전 페이지 -->
-	<select id="getPrev" parameterType="int" resultType="kr.co.vo.BoardVO">
-		SELECT * FROM (
-		SELECT * FROM MP_BOARD ORDER BY BNO DESC)
-		WHERE BNO &lt; #{bno}
-		AND ROWNUM = 1
-	</select>
-	
-	<!-- 다음 페이지 -->
-	<select id="getNext" parameterType="int" resultType="kr.co.vo.BoardVO">
-		SELECT * FROM MP_BOARD
-		WHERE BNO = (
-		SELECT BNO FROM MP_BOARD 
-		WHERE BNO &gt; #{bno}
-		AND ROWNUM = 1)
-	</select>
-	
-	<!-- 총 게시물 -->
+	<!-- 총 게시물 수 -->
 	<select id="listCount" parameterType="kr.co.vo.SearchCriteria" resultType="int">
 		SELECT COUNT(BNO)
 		FROM MP_BOARD
@@ -55,6 +38,23 @@
 			<if test="searchType == 'w'.toString()">AND WRITER LIKE '%' || #{keyword} || '%'</if>
 		</if> 
 	</sql>
+	
+	<!-- 이전 게시물 -->
+	<select id="getPrev" parameterType="int" resultType="kr.co.vo.BoardVO">
+		SELECT * FROM (
+		SELECT * FROM MP_BOARD ORDER BY BNO DESC)
+		WHERE BNO &lt; #{bno}
+		AND ROWNUM = 1
+	</select>
+	
+	<!-- 다음 게시물 -->
+	<select id="getNext" parameterType="int" resultType="kr.co.vo.BoardVO">
+		SELECT * FROM MP_BOARD
+		WHERE BNO = (
+		SELECT BNO FROM MP_BOARD 
+		WHERE BNO &gt; #{bno}
+		AND ROWNUM = 1)
+	</select>
 	
 	<!-- 게시판 detail page 조회 -->
 	<select id="read" parameterType="int" resultType="kr.co.vo.BoardVO">
