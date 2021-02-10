@@ -28,13 +28,11 @@ first Board Project
 
 - 총 기간 : 2020.12.04 ~ 2021.01.07
 
-![Board%20Project%20bb2472f8614841c7bab7f067ea44f036/_.pptx_-_PowerPoint_2021-01-09_09.58.45.png](Board%20Project%20bb2472f8614841c7bab7f067ea44f036/_.pptx_-_PowerPoint_2021-01-09_09.58.45.png)
 
 # 2. 요구사항 정의
 
 ---
 
-![Board%20Project%20bb2472f8614841c7bab7f067ea44f036/KakaoTalk_20210109_125212956.jpg](Board%20Project%20bb2472f8614841c7bab7f067ea44f036/KakaoTalk_20210109_125212956.jpg)
 
 - 🙎🏻‍♂️**사용자**
 
@@ -55,50 +53,3 @@ first Board Project
 - ⚙**마이페이지**
     - **Information** : Session에 저장된 회원 개인의 정보(아이디, 이름, 이메일, 가입날짜)를 확인할 수 있다.
     - **Board(Extended)** : 회원 본인이 올린 게시물을 관리할 수 있고, 기존 게시판에서 확장된 기능인 일괄 삭제를 이용할 수 있다.
-
-# 3. Front-End
-
-- **Design 관점**
-
-    기업형 웹 서비스에서 사용자에게 제공할 중요한 요소는 간결함이라고 생각됩니다. 디자인에 사용되는 색상을 3개로 한정하여 깔끔한 디자인을 추구하였고, 유저 관점에서 특별히 눈에 띄어야 하는 부분에 관해서만 동적인 효과를 넣었습니다.
-    *(문서화를 위해 지엽적인 페이지 공백은 이미지에서 삭제했습니다. 따라서 문서 이미지와 실제 웹 페이지는 차이가 있음을 알려드립니다.)*
-
-- 홈페이지
-
-    ![Board%20Project%20bb2472f8614841c7bab7f067ea44f036/Hello_YongminLand_-_Chrome_2021-01-09_16.21.46.png](Board%20Project%20bb2472f8614841c7bab7f067ea44f036/Hello_YongminLand_-_Chrome_2021-01-09_16.21.46.png)
-
-    member/home.jsp
-
-    > CSS 주요 기능
-
-    ---
-
-    - **메뉴 Hover**
-
-        ![Board%20Project%20bb2472f8614841c7bab7f067ea44f036/Yongmin_Community_header.css_at_main__lym3074_Yongmin_Community_-_Chrome_2021-01-10_20.37.39.png](Board%20Project%20bb2472f8614841c7bab7f067ea44f036/Yongmin_Community_header.css_at_main__lym3074_Yongmin_Community_-_Chrome_2021-01-10_20.37.39.png)
-
-        header.css
-
-        - 메뉴 hover 시, 제목 하단에 흰색 줄이 양쪽으로 벌어지며 **선택할 메뉴를 인식**할 수 있다.
-
-    ---
-
-    - ID, Password 입력
-
-        ![Board%20Project%20bb2472f8614841c7bab7f067ea44f036/CommunityPrj_-_YM_Community_src_main_webapp_resources_css_home.css_-_Spring_Tool_Suite_4_2021-01-10_21.11.14.png](Board%20Project%20bb2472f8614841c7bab7f067ea44f036/CommunityPrj_-_YM_Community_src_main_webapp_resources_css_home.css_-_Spring_Tool_Suite_4_2021-01-10_21.11.14.png)
-
-1. 가입 페이지(Header 생략)
-
-    ![Board%20Project%20bb2472f8614841c7bab7f067ea44f036/Hello_YongminLand_-_Chrome_2021-01-09_16.13.54.png](Board%20Project%20bb2472f8614841c7bab7f067ea44f036/Hello_YongminLand_-_Chrome_2021-01-09_16.13.54.png)
-
-![Board%20Project%20bb2472f8614841c7bab7f067ea44f036/localhost_8080_board_list_-_Chrome_2021-01-09_16.06.49.png](Board%20Project%20bb2472f8614841c7bab7f067ea44f036/localhost_8080_board_list_-_Chrome_2021-01-09_16.06.49.png)
-
-board/list.jsp
-
-member/myPage.jsp
-
-![Board%20Project%20bb2472f8614841c7bab7f067ea44f036/Hello_YongminLand_-_Chrome_2021-01-09_16.16.54.png](Board%20Project%20bb2472f8614841c7bab7f067ea44f036/Hello_YongminLand_-_Chrome_2021-01-09_16.16.54.png)
-
-1. 이것은 프로젝트다.
-
-# 4. Back-End
