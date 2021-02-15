@@ -1,7 +1,3 @@
-# Yongmin's Community
-
-first Board Project
-
 # Board Project
 
 ---
